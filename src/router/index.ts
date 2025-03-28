@@ -1,5 +1,5 @@
 import type { App } from "vue";
-import { createRouter, createWebHashHistory, type RouteRecordRaw } from "vue-router";
+import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
 
 export const Layout = () => import("@/layout/index.vue");
 
@@ -67,7 +67,7 @@ export const constantRoutes: RouteRecordRaw[] = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: constantRoutes,
   scrollBehavior: () => ({ left: 0, top: 0 }),
 });

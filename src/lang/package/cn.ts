@@ -1,0 +1,16 @@
+export default {
+  LOGIN_WELCOME: "欢迎回来! ",
+  LOGIN_WELCOME_SUB: "登入扑克梦以继续管理.",
+  LOGIN_EMAIL: "信箱",
+  LOGIN_PASSWORD: "密码",
+  LOGIN_EMAIL_PLACEHOLDER: "输入您的信箱",
+  LOGIN_PASSWORD_PLACEHOLDER: "输入您的密码",
+  LOGIN_REMEMBER_ACCOUNT: "记住我的帐号",
+  LOGIN_LOGIN_TEXT: "登入",
+  MSG_REQUIRED: "{field} 为必填",
+  MSG_FORMAT_ERROR: "{field} 格式错误",
+  USER_PROFILE: "會員資料",
+  USER_CHANGE_PASSWORD: "更改密碼",
+  USER_MARGIN: "保證金",
+  USER_LOGOUT: "登出",
+};

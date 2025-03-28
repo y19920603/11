@@ -3,31 +3,26 @@ import { constantRoutes } from "@/router";
 import { store } from "@/store";
 import router from "@/router";
 
-import MenuAPI, { type RouteVO } from "@/api/system/menu.api";
+import MenuAPI, { SidebarMenuVO, type RouteVO } from "@/api/system/menu.api";
 const modules = import.meta.glob("../../views/**/**.vue");
 const Layout = () => import("@/layout/index.vue");
 
 export const usePermissionStore = defineStore("permission", () => {
-  // 储所有路由，包括静态路由和动态路由
   const routes = ref<RouteRecordRaw[]>([]);
-  // 混合模式左侧菜单路由
   const mixedLayoutLeftRoutes = ref<RouteRecordRaw[]>([]);
-  // 路由是否加载完成
   const isRoutesLoaded = ref(false);
 
-  /**
-   * 获取后台动态路由数据，解析并注册到全局路由
-   *
-   * @returns Promise<RouteRecordRaw[]> 解析后的动态路由列表
-   */
   function generateRoutes() {
     return new Promise<RouteRecordRaw[]>((resolve, reject) => {
       MenuAPI.getRoutes()
-        .then((data) => {
-          const dynamicRoutes = parseDynamicRoutes(data);
-          routes.value = [...constantRoutes, ...dynamicRoutes];
-          isRoutesLoaded.value = true;
-          resolve(dynamicRoutes);
+        .then(({ data, result }) => {
+          if (result) {
+            const menus = convertToRouteVO(data);
+            const dynamicRoutes = parseDynamicRoutes(menus);
+            routes.value = [...dynamicRoutes];
+            isRoutesLoaded.value = true;
+            resolve(dynamicRoutes);
+          }
         })
         .catch((error) => {
           reject(error);
@@ -51,14 +46,12 @@ export const usePermissionStore = defineStore("permission", () => {
    * 重置路由
    */
   const resetRouter = () => {
-    //  从 router 实例中移除动态路由
     routes.value.forEach((route) => {
       if (route.name && !constantRoutes.find((r) => r.name === route.name)) {
         router.removeRoute(route.name);
       }
     });
 
-    // 清空本地存储的路由和菜单数据
     routes.value = [];
     mixedLayoutLeftRoutes.value = [];
     isRoutesLoaded.value = false;
@@ -73,6 +66,27 @@ export const usePermissionStore = defineStore("permission", () => {
     resetRouter,
   };
 });
+
+function convertToRouteVO(menuData: SidebarMenuVO[], parentPath = ""): RouteVO[] {
+  return menuData.map((item) => {
+    const currentPath = item.url ? `${parentPath}/${item.url}` : parentPath;
+
+    const route: RouteVO = {
+      name: `${item.name}-${currentPath.replace(/\//g, "-")}`,
+      path: currentPath,
+      component: item.url ? `${currentPath}-component` : undefined,
+      meta: {
+        title: item.name,
+        icon: item.icon,
+        alwaysShow: item.subitems && item.subitems.length === 1,
+        hidden: false,
+      },
+      children: item.subitems.length ? convertToRouteVO(item.subitems, currentPath) : [],
+    };
+
+    return route;
+  });
+}
 
 /**
  * 解析后端返回的路由数据并转换为 Vue Router 兼容的路由配置

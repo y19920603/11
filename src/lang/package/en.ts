@@ -1,3 +1,16 @@
 export default {
-  BAS_LOGIN: "Login",
+  LOGIN_WELCOME: "Welcome Back !",
+  LOGIN_WELCOME_SUB: "Sign in to continue to Poker Mars.",
+  LOGIN_EMAIL: "Email",
+  LOGIN_PASSWORD: "Password",
+  LOGIN_EMAIL_PLACEHOLDER: "Enter your email",
+  LOGIN_PASSWORD_PLACEHOLDER: "Enter your password",
+  LOGIN_REMEMBER_ACCOUNT: "Remember me",
+  LOGIN_LOGIN_TEXT: "Login",
+  MSG_REQUIRED: "{field} is required",
+  MSG_FORMAT_ERROR: "{field}  format is invalid",
+  USER_PROFILE: "Profile",
+  USER_CHANGE_PASSWORD: "Change Password",
+  USER_MARGIN: "MARGIN",
+  USER_LOGOUT: "Logout",
 };

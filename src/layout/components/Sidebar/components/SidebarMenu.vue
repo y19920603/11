@@ -20,8 +20,8 @@
         : undefined
     "
     :popper-effect="theme"
-    :unique-opened="false"
-    :collapse-transition="false"
+    :unique-opened="true"
+    :collapse-transition="true"
     :mode="menuMode"
     @open="onMenuOpen"
     @close="onMenuClose"
@@ -86,6 +86,10 @@ const sidebarColorScheme = computed(() => settingsStore.sidebarColorScheme);
  * @returns 完整的绝对路径 D://vue3-element-admin/system/user
  */
 function resolveFullPath(routePath: string) {
+  if (!routePath) {
+    return "";
+  }
+
   if (isExternal(routePath)) {
     return routePath;
   }

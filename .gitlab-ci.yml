@@ -1,0 +1,56 @@
+variables:
+  SUDO_PASSWORD: "90357971"
+
+stages:
+  - build
+  - deploy
+
+default:
+  cache:
+    paths:
+      - node_modules/
+
+
+# 構建應用
+build:
+  stage: build
+
+  script:
+    - echo "當前工作目錄 $(pwd)"
+    - echo "項目文件列表：$(ls -al)"
+    - echo "檢查 package.json 是否存在：$(ls -al package.json)"
+    #- yarn install
+    - yarn build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+  only:
+    - dev
+
+# 部署到遠端服務器
+deploy:
+  stage: deploy
+
+  script:
+    - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
+    - eval $(ssh-agent -s)
+
+    # 添加私鑰
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > /tmp/private_key
+    - chmod 600 /tmp/private_key
+    - ssh-add /tmp/private_key
+
+    # 確保目錄存在
+    - mkdir -p ~/.ssh
+
+    - echo "$CI_COMMIT_BRANCH - Ensuring remote directories exist..."
+    - echo $SUDO_PASSWORD | ssh skyray@192.168.1.202 "sudo -S mkdir -p /var/www/${CI_COMMIT_BRANCH}/poker_cms_web/ && sudo chown -R skyray:skyray /var/www/${CI_COMMIT_BRANCH}/poker_cms_web"
+
+    # 添加遠程主機到 known_hosts
+    - ssh-keyscan 192.168.1.202 >> ~/.ssh/known_hosts
+
+    - echo "開始部署到遠端服務器..."
+    - scp -r dist/ skyray@192.168.1.202:/var/www/${CI_COMMIT_BRANCH}/poker_cms_web/
+  only:
+    - dev

@@ -43,7 +43,6 @@ function generateLangTsFiles(data, outputDir) {
     langTsContent += `\n};\n`;
 
     fs.writeFileSync(langTsPath, langTsContent, "utf-8");
-    console.log(`生成语言 TypeScript 文件: ${langTsPath}`);
   });
 }
 

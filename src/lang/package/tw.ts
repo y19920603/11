@@ -1,0 +1,16 @@
+export default {
+  LOGIN_WELCOME: "歡迎回來! ",
+  LOGIN_WELCOME_SUB: "登入撲克夢以繼續管理.",
+  LOGIN_EMAIL: "信箱",
+  LOGIN_PASSWORD: "密碼",
+  LOGIN_EMAIL_PLACEHOLDER: "輸入您的信箱",
+  LOGIN_PASSWORD_PLACEHOLDER: "輸入您的密碼",
+  LOGIN_REMEMBER_ACCOUNT: "記住我的帳號",
+  LOGIN_LOGIN_TEXT: "登入",
+  MSG_REQUIRED: "{field} 為必填",
+  MSG_FORMAT_ERROR: "{field} 格式錯誤",
+  USER_PROFILE: "會員資料",
+  USER_CHANGE_PASSWORD: "更改密碼",
+  USER_MARGIN: "保證金",
+  USER_LOGOUT: "登出",
+};

@@ -1,5 +1,5 @@
 {
-  "name": "vue3-element-admin",
+  "name": "pokermars-cms",
   "version": "2.25.0",
   "private": true,
   "type": "module",
@@ -14,8 +14,6 @@
     "lint:stylelint": "stylelint --cache \"**/*.{css,scss,vue}\" --fix",
     "lint:lint-staged": "lint-staged",
     "preinstall": "npx only-allow pnpm",
-    "prepare": "husky",
-    "commit": "git-cz",
     "lang": "node src/lang/generate-lang.js"
   },
   "config": {
@@ -93,7 +91,6 @@
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-vue": "^10.0.0",
     "globals": "^15.15.0",
-    "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
     "postcss": "^8.5.3",
     "postcss-html": "^1.8.0",
@@ -122,7 +119,5 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "repository": "https://gitee.com/youlaiorg/vue3-element-admin.git",
-  "author": "有来开源组织",
   "license": "MIT"
 }

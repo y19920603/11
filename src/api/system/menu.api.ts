@@ -1,18 +1,13 @@
 import request from "@/utils/request";
-// 菜单基础URL
-const MENU_BASE_URL = "/api/v1/menus";
+const MENU_BASE_URL = "";
 
 const MenuAPI = {
   /**
-   * 获取当前用户的路由列表
-   * <p/>
-   * 无需传入角色，后端解析token获取角色自行判断是否拥有路由的权限
-   *
-   * @returns 路由列表
+   * 獲取 menu 列表
    */
   getRoutes() {
-    return request<any, RouteVO[]>({
-      url: `${MENU_BASE_URL}/routes`,
+    return request<any, SidebarMenuResult>({
+      url: "/sidebar-menu/list",
       method: "get",
     });
   },
@@ -176,6 +171,20 @@ export interface MenuForm {
 interface KeyValue {
   key: string;
   value: string;
+}
+
+export interface SidebarMenuResult {
+  result: boolean;
+  data: SidebarMenuVO[];
+}
+
+export interface SidebarMenuVO {
+  id: number;
+  icon: string;
+  name: string;
+  sidebar_sort: number;
+  url: string;
+  subitems: SidebarMenuVO[];
 }
 
 /** RouteVO，路由对象 */

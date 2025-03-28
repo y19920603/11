@@ -18,10 +18,7 @@
           query: onlyOneChild.meta.params,
         }"
       >
-        <el-menu-item
-          :index="resolvePath(onlyOneChild.path)"
-          :class="{ 'submenu-title-noDropdown': !isNest }"
-        >
+        <el-menu-item :index="item.name" :class="{ 'submenu-title-noDropdown': !isNest }">
           <SidebarMenuItemTitle
             :icon="onlyOneChild.meta.icon || item.meta?.icon"
             :title="onlyOneChild.meta.title"
@@ -31,7 +28,7 @@
     </template>
 
     <!--【非叶子节点】显示含多个子节点的父菜单，或始终显示的单子节点 -->
-    <el-sub-menu v-else :index="resolvePath(item.path)" teleported>
+    <el-sub-menu v-else :index="item.name" teleported>
       <template #title>
         <SidebarMenuItemTitle v-if="item.meta" :icon="item.meta.icon" :title="item.meta.title" />
       </template>
@@ -125,6 +122,7 @@ function hasOneShowingChild(children: RouteRecordRaw[] = [], parent: RouteRecord
  * @returns 绝对路径
  */
 function resolvePath(routePath: string) {
+  if (!routePath) return "";
   if (isExternal(routePath)) return routePath;
   if (isExternal(props.basePath)) return props.basePath;
 
