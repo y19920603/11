@@ -23,7 +23,7 @@
                   :placeholder="$t('LOGIN_EMAIL_PLACEHOLDER')"
                   name="username"
                   size="large"
-                  class="h-[40px]"
+                  class="h-[40px] text-amber!"
                 />
               </div>
             </el-form-item>
@@ -47,14 +47,14 @@
             <div class="text-[#f56c6c] text-sm my-2">{{ errorMsg }}</div>
 
             <div class="w-full py-1 flex-x-between">
-              <el-checkbox>
+              <el-checkbox v-model="remember">
                 {{ $t("LOGIN_REMEMBER_ACCOUNT") }}
               </el-checkbox>
             </div>
 
             <!-- 登录按钮 -->
             <el-button
-              class="w-auto mt-4 self-center bg-gradient-to-b from-[#7E90FF] to-[#604CD6]"
+              class="w-[100px]! mt-4 self-center bg-gradient-to-b from-[#7E90FF] to-[#604CD6] color-white! gap-2! border-none!"
               :loading="loading"
               size="large"
               round
@@ -77,8 +77,10 @@ import { errorObj, type LoginFormData } from "@/api/auth.api";
 import router from "@/router";
 
 import type { FormInstance } from "element-plus";
+import { Base64 } from "js-base64";
 
 import { useUserStore } from "@/store";
+import { Loca, LOCA_EMAIL, LOCA_PASSWORD } from "@/utils/loca";
 
 const userStore = useUserStore();
 
@@ -86,7 +88,7 @@ const route = useRoute();
 const { t } = useI18n();
 const loginFormRef = ref<FormInstance>();
 const errorMsg = ref("");
-
+const remember = ref(false);
 const loading = ref(false);
 
 const loginFormData = ref<LoginFormData>({
@@ -128,6 +130,12 @@ async function handleLoginSubmit() {
   loading.value = true;
   try {
     await userStore.login(loginFormData.value);
+    if (remember.value) {
+      Loca.set(LOCA_EMAIL, loginFormData.value.email);
+      Loca.set(LOCA_PASSWORD, Base64.encode(loginFormData.value.password));
+    } else {
+      Loca.remove([LOCA_EMAIL, LOCA_PASSWORD]);
+    }
 
     // await userStore.getUserInfo();
 
@@ -155,4 +163,42 @@ function resolveRedirectTarget(query: LocationQuery): RouteLocationRaw {
     return { path: defaultPath };
   }
 }
+
+onMounted(() => {
+  const email = Loca.get<string>(LOCA_EMAIL);
+  if (email) {
+    loginFormData.value.email = email;
+    loginFormData.value.password = Base64.decode(Loca.get<string>(LOCA_PASSWORD)!);
+    remember.value = true;
+  }
+});
 </script>
+
+<style scoped>
+:deep(.el-input__inner) {
+  color: #adb5bd;
+}
+:deep(.el-input) {
+  --el-input-border-color: #2e3343 !important;
+  --el-input-focus-border-color: #2e3343 !important;
+  --el-input-placeholder-color: #656d9a;
+}
+:deep(.el-input__wrapper) {
+  border-radius: 100px;
+  background-color: #2e3343;
+  border-color: #2e3343;
+}
+
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  background-color: #8480ff !important;
+  border-color: #8480ff !important;
+}
+
+:deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
+  color: #fff;
+}
+
+:deep(.el-form-item__label) {
+  color: "#ADB3D4";
+}
+</style>

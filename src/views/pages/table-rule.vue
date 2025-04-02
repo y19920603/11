@@ -1,0 +1,1 @@
+<template>table-rule</template>

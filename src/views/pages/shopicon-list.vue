@@ -1,0 +1,1 @@
+<template>shopicon-list</template>

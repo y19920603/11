@@ -7,7 +7,6 @@ import { usePermissionStore, useUserStore } from "@/store";
 export function setupPermission() {
   // 白名单路由
   const whiteList = ["/login"];
-
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
 
@@ -35,7 +34,13 @@ export function setupPermission() {
           try {
             // 生成动态路由
             const dynamicRoutes = await permissionStore.generateRoutes();
-            dynamicRoutes.forEach((route: RouteRecordRaw) => router.addRoute(route));
+            dynamicRoutes
+              .flatMap((e) => e.children || [])
+              .forEach((route: RouteRecordRaw) => {
+                if (route) {
+                  router.addRoute(route);
+                }
+              });
             next({ ...to, replace: true });
           } catch (error) {
             console.error(error);

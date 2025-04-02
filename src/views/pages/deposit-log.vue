@@ -1,0 +1,1 @@
+<template>deposit-log</template>

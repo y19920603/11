@@ -6,20 +6,18 @@
 
     <div :class="{ hasTagsView: isShowTagsView }" class="layout__main">
       <Sidebar class="layout__sidebar" />
-      <TagsView v-if="isShowTagsView" />
-      <AppMain />
+      <div class="main-container">
+        <router-view></router-view>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// 状态管理
 import { useAppStore, useSettingsStore, usePermissionStore } from "@/store";
 
-// 枚举
 import { DeviceEnum } from "@/enums/settings/device.enum";
 
-// 组件
 import NavBar from "./components/NavBar/index.vue";
 
 const appStore = useAppStore();
@@ -80,6 +78,10 @@ function handleCloseSidebar() {
 }
 </script>
 <style lang="scss" scoped>
+.main-container {
+  overflow-y: auto;
+  height: calc(100vh - $navbar-height);
+}
 .layout {
   width: 100%;
   height: 100%;

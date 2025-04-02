@@ -7,7 +7,10 @@
     <el-dropdown trigger="click" @visible-change="handleDropdownVisibleChange">
       <div class="flex justify-center items-center w-[176px] h-[40px] bg-[#1A1D29] rounded-full">
         <div class="space-x-[12px] flex justify-center items-center">
-          <img class="w-[32px] h-[32px] rounded-full" :src="userStore.userInfo.avatar" />
+          <img
+            class="w-[32px] h-[32px] rounded-full"
+            src="https://foruda.gitee.com/images/1723603502796844527/03cdca2a_716974.gif"
+          />
           <span class="">寫死人名</span>
         </div>
         <div class="flex-1"></div>

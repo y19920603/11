@@ -1,0 +1,1 @@
+<template>master-profit</template>

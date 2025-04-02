@@ -1,34 +1,24 @@
 <template>
   <div v-if="!item.meta || !item.meta.hidden">
-    <!--【叶子节点】显示叶子节点或唯一子节点且父节点未配置始终显示 -->
     <template
       v-if="
-        // 未配置始终显示，使用唯一子节点替换父节点显示为叶子节点
         (!item.meta?.alwaysShow &&
           hasOneShowingChild(item.children, item) &&
           (!onlyOneChild.children || onlyOneChild.noShowingChildren)) ||
-        // 即使配置了始终显示，但无子节点，也显示为叶子节点
         (item.meta?.alwaysShow && !item.children)
       "
     >
-      <AppLink
-        v-if="onlyOneChild.meta"
-        :to="{
-          path: resolvePath(onlyOneChild.path),
-          query: onlyOneChild.meta.params,
-        }"
-      >
-        <el-menu-item :index="item.name" :class="{ 'submenu-title-noDropdown': !isNest }">
-          <SidebarMenuItemTitle
-            :icon="onlyOneChild.meta.icon || item.meta?.icon"
-            :title="onlyOneChild.meta.title"
-          />
+      <RouterLink :to="{ path: item.path }">
+        <el-menu-item
+          :index="item.name?.toString() ?? ''"
+          :class="{ 'submenu-title-noDropdown': !isNest }"
+        >
+          <SidebarMenuItemTitle :icon="onlyOneChild.meta.icon" :title="onlyOneChild.meta.title" />
         </el-menu-item>
-      </AppLink>
+      </RouterLink>
     </template>
 
-    <!--【非叶子节点】显示含多个子节点的父菜单，或始终显示的单子节点 -->
-    <el-sub-menu v-else :index="item.name" teleported>
+    <el-sub-menu v-else ref="submenuRef" :index="item.name?.toString() ?? ''" teleported>
       <template #title>
         <SidebarMenuItemTitle v-if="item.meta" :icon="item.meta.icon" :title="item.meta.title" />
       </template>
@@ -45,54 +35,32 @@
 </template>
 
 <script setup lang="ts">
-defineOptions({
-  name: "SidebarMenuItem",
-  inheritAttrs: false,
-});
-
+import { ref, watch, computed, nextTick } from "vue";
 import path from "path-browserify";
 import { RouteRecordRaw } from "vue-router";
-
+import { useRoute } from "vue-router";
 import { isExternal } from "@/utils";
+import { ElSubMenu } from "element-plus";
 
 const props = defineProps({
-  /**
-   * 当前路由对象
-   */
   item: {
     type: Object as PropType<RouteRecordRaw>,
     required: true,
   },
-
-  /**
-   * 父级完整路径
-   */
   basePath: {
     type: String,
     required: true,
   },
-
-  /**
-   * 是否为嵌套路由
-   */
   isNest: {
     type: Boolean,
     default: false,
   },
 });
 
-// 可见的唯一子节点
 const onlyOneChild = ref();
+const openedState = inject("openedState", ref(false));
 
-/**
- * 检查是否仅有一个可见子节点
- *
- * @param children 子路由数组
- * @param parent 父级路由
- * @returns 是否仅有一个可见子节点
- */
 function hasOneShowingChild(children: RouteRecordRaw[] = [], parent: RouteRecordRaw) {
-  // 过滤出可见子节点
   const showingChildren = children.filter((route: RouteRecordRaw) => {
     if (!route.meta?.hidden) {
       onlyOneChild.value = route;
@@ -101,34 +69,50 @@ function hasOneShowingChild(children: RouteRecordRaw[] = [], parent: RouteRecord
     return false;
   });
 
-  // 仅有一个节点
   if (showingChildren.length === 1) {
     return true;
   }
 
-  // 无子节点时
   if (showingChildren.length === 0) {
-    // 父节点设置为唯一显示节点，并标记为无子节点
     onlyOneChild.value = { ...parent, path: "", noShowingChildren: true };
     return true;
   }
   return false;
 }
 
-/**
- * 获取完整路径，适配外部链接
- *
- * @param routePath 路由路径
- * @returns 绝对路径
- */
 function resolvePath(routePath: string) {
   if (!routePath) return "";
   if (isExternal(routePath)) return routePath;
-  if (isExternal(props.basePath)) return props.basePath;
-
-  // 拼接父路径和当前路径
-  return path.resolve(props.basePath, routePath);
+  if (isExternal(props.basePath)) return routePath;
+  if (!props.basePath) return routePath;
+  return path.join(props.basePath, routePath);
 }
+const currentRoute = useRoute();
+const currentRoutePath = computed(() => currentRoute.path);
+
+const matchedChild = computed(() =>
+  props.item.children?.find((e) => e.path === currentRoutePath.value)
+);
+
+const submenuRef = ref<InstanceType<typeof ElSubMenu> | null>(null);
+
+const triggerMenuOpen = async () => {
+  await nextTick();
+
+  if (submenuRef.value && !openedState.value) {
+    const submenuTitle = submenuRef.value.$el.querySelector(".el-sub-menu__title");
+    if (submenuTitle) {
+      submenuTitle.click();
+      openedState.value = true;
+    }
+  }
+};
+
+watch(matchedChild, (newVal) => {
+  if (newVal && !openedState.value) {
+    triggerMenuOpen();
+  }
+});
 </script>
 
 <style lang="scss">
@@ -183,11 +167,25 @@ function resolvePath(routePath: string) {
       }
     }
   }
+
+  .router-link-active > .el-menu-item.submenu-title-noDropdown {
+    border-radius: 0px;
+  }
 }
 
 html.dark {
   .el-menu-item:hover {
-    background-color: $menu-hover;
+    background: linear-gradient(to right, rgba(99, 109, 235, 0.5), rgba(99, 109, 235, 0.08));
+    color: #fff;
+    border-radius: 50px;
+  }
+
+  .hideSidebar {
+    .el-menu-item:hover {
+      background: linear-gradient(to right, rgba(99, 109, 235, 0.5), rgba(99, 109, 235, 0.08));
+      color: #fff;
+      border-radius: 0px;
+    }
   }
 }
 
@@ -195,5 +193,15 @@ html.sidebar-color-blue {
   .el-menu-item:hover {
     background-color: $menu-hover;
   }
+}
+
+.el-menu-item.is-active {
+  color: #fff !important;
+}
+
+.router-link-active > .el-menu-item {
+  background: linear-gradient(to right, rgba(99, 109, 235, 0.5), rgba(99, 109, 235, 0.08));
+  color: #fff;
+  border-radius: 50px;
 }
 </style>

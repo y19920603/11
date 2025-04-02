@@ -1,32 +1,22 @@
 <template>
   <el-config-provider :locale="locale" :size="size">
-    <!-- 开启水印 -->
-    <el-watermark
-      :font="{ color: fontColor }"
-      :content="watermarkEnabled ? defaultSettings.watermarkContent : ''"
-      :z-index="9999"
-      class="wh-full"
-    >
+    <template v-if="hasLayout">
+      <Layout></Layout>
+    </template>
+    <template v-else>
       <router-view />
-    </el-watermark>
+    </template>
   </el-config-provider>
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useSettingsStore } from "@/store";
-import defaultSettings from "@/settings";
-import { ThemeMode } from "@/enums/settings/theme.enum";
+import { useAppStore } from "@/store";
 import { ComponentSize } from "@/enums/settings/layout.enum";
+import Layout from "@/layout/index.vue";
 
 const appStore = useAppStore();
-const settingsStore = useSettingsStore();
-
+const route = useRoute();
 const locale = computed(() => appStore.locale);
 const size = computed(() => appStore.size as ComponentSize);
-const watermarkEnabled = computed(() => settingsStore.watermarkEnabled);
-
-// 明亮/暗黑主题水印字体颜色适配
-const fontColor = computed(() => {
-  return settingsStore.theme === ThemeMode.DARK ? "rgba(255, 255, 255, .15)" : "rgba(0, 0, 0, .15)";
-});
+const hasLayout = computed(() => route.meta.layout !== false); // 默认需要 Layout，除非meta中设置 layout: false
 </script>

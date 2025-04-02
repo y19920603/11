@@ -1,0 +1,1 @@
+<template>permission-settings</template>

@@ -1,0 +1,1 @@
+<template>shop-management</template>

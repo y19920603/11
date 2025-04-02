@@ -1,0 +1,1 @@
+<template>banner-management</template>

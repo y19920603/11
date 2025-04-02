@@ -2,9 +2,6 @@ import { LayoutMode, ComponentSize, SidebarColor, ThemeMode, LanguageEnum } from
 
 const { pkg } = __APP_INFO__;
 
-// 检查用户的操作系统是否使用深色模式
-const mediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
-
 const defaultSettings: AppSettings = {
   // 系统Title
   title: pkg.name,
@@ -19,7 +16,7 @@ const defaultSettings: AppSettings = {
   // 布局方式，默认为左侧布局
   layout: LayoutMode.LEFT,
   // 主题，根据操作系统的色彩方案自动选择
-  theme: mediaQueryList.matches ? ThemeMode.DARK : ThemeMode.LIGHT,
+  theme: ThemeMode.DARK,
   // 组件大小 default | medium | small | large
   size: ComponentSize.DEFAULT,
   // 语言

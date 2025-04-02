@@ -1,0 +1,1 @@
+<template>ga-profit</template>
