@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@bhplugin/vue3-datatable':
+        specifier: ^2.0.2
+        version: 2.0.2(vue@3.5.13(typescript@5.8.2))
       '@element-plus/icons-vue':
         specifier: ^2.3.1
         version: 2.3.1(vue@3.5.13(typescript@5.8.2))
@@ -26,24 +29,51 @@ importers:
       '@wangeditor-next/editor-for-vue':
         specifier: ^5.1.14
         version: 5.1.14(@wangeditor-next/editor@5.6.34)(vue@3.5.13(typescript@5.8.2))
-      ag-grid-community:
-        specifier: ^33.2.1
-        version: 33.2.1
-      ag-grid-vue3:
-        specifier: ^33.2.1
-        version: 33.2.1(vue@3.5.13(typescript@5.8.2))
       animate.css:
         specifier: ^4.1.1
         version: 4.1.1
       axios:
         specifier: ^1.8.4
         version: 1.8.4
+      bootstrap:
+        specifier: ^5.3.5
+        version: 5.3.5(@popperjs/core@2.11.8)
       codemirror:
         specifier: ^5.65.19
         version: 5.65.19
       codemirror-editor-vue3:
         specifier: ^2.8.0
         version: 2.8.0(codemirror@5.65.19)(diff-match-patch@1.0.5)(vue@3.5.13(typescript@5.8.2))
+      datatables.net:
+        specifier: ^2.2.2
+        version: 2.2.2
+      datatables.net-bs5:
+        specifier: ^2.2.2
+        version: 2.2.2
+      datatables.net-buttons:
+        specifier: ^3.2.2
+        version: 3.2.2
+      datatables.net-buttons-dt:
+        specifier: ^3.2.2
+        version: 3.2.2
+      datatables.net-colreorder:
+        specifier: ^2.0.4
+        version: 2.0.4
+      datatables.net-dt:
+        specifier: ^2.2.2
+        version: 2.2.2
+      datatables.net-fixedheader:
+        specifier: ^4.0.1
+        version: 4.0.1
+      datatables.net-responsive-bs5:
+        specifier: ^3.0.4
+        version: 3.0.4
+      datatables.net-rowreorder:
+        specifier: ^1.5.0
+        version: 1.5.0
+      datatables.net-vue3:
+        specifier: ^3.0.4
+        version: 3.0.4(datatables.net@2.2.2)(vue@3.5.13(typescript@5.8.2))
       default-passive-events:
         specifier: ^2.0.0
         version: 2.0.0
@@ -277,6 +307,11 @@ packages:
   '@babel/types@7.27.0':
     resolution: {integrity: sha512-H45s8fVLYjbhFH62dIJ3WtmJ6RSPt/3DRO0ZcT2SUiYiQyz3BLVb9ADEnLl91m74aQPS3AzzeajZHYOalWe3bg==}
     engines: {node: '>=6.9.0'}
+
+  '@bhplugin/vue3-datatable@2.0.2':
+    resolution: {integrity: sha512-yOC3mM/WEHOxR16enCPemnrCDxNaNQJ6e0/tJ1z+lLyJInkwhpQfJ96TTTWgWiz++8gQG6k+kcfs4CTJvurmGw==}
+    peerDependencies:
+      vue: '>=3.0.0'
 
   '@commitlint/cli@19.8.0':
     resolution: {integrity: sha512-t/fCrLVu+Ru01h0DtlgHZXbHV2Y8gKocTR5elDOqIRUzQd0/6hpt2VIWOj9b3NDo7y4/gfxeR2zRtXq/qO6iUg==}
@@ -763,6 +798,9 @@ packages:
 
   '@polka/url@1.0.0-next.28':
     resolution: {integrity: sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw==}
+
+  '@popperjs/core@2.11.8':
+    resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
 
   '@primeuix/styled@0.5.1':
     resolution: {integrity: sha512-5Ftw/KSauDPClQ8F2qCyCUF7cIUEY4yLNikf0rKV7Vsb8zGYNK0dahQe7CChaR6M2Kn+NA2DSBSk76ZXqj6Uog==}
@@ -1309,17 +1347,6 @@ packages:
     resolution: {integrity: sha512-ynZ4w/nUUv5rrsR8UUGoe1VC9hZj6V5hU9Qw1HlMDJGEJw5S7TfTErWTjMys6M7vr0YWcPqs3qAr4ss0nDfP+A==}
     engines: {node: '>=0.8'}
 
-  ag-charts-types@11.2.1:
-    resolution: {integrity: sha512-uzN1OUEn5nCFDZ4GTNkYHpg+6hbF+NamIwUOK/aSHBRvJxJU9/sK+K1QkqYpU912mHtpAZ9x0zEddr2sw6pT2Q==}
-
-  ag-grid-community@33.2.1:
-    resolution: {integrity: sha512-eQVRv+x8C3+T2weBux7Y+SN6IMs4lYJjTmNSfm/OX3ANH3GsscvqRiOxoV/R+hQWL7GUXOCLPZHFzZpzSdk0xg==}
-
-  ag-grid-vue3@33.2.1:
-    resolution: {integrity: sha512-lnhMP3yNbyEKuWvb0S6r8KfdzQgVz70KnNOeZjHrbvRJt9bGpYiyfjHSPQ4GuFM4sEhpreN97wvOGorwf4Le1A==}
-    peerDependencies:
-      vue: ^3.5.0
-
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
 
@@ -1450,6 +1477,11 @@ packages:
 
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
+
+  bootstrap@5.3.5:
+    resolution: {integrity: sha512-ct1CHKtiobRimyGzmsSldEtM03E8fcEX4Tb3dGXz1V8faRwM50+vfHwTzOxB3IlKO7m+9vTH3s/3C6T2EAPeTA==}
+    peerDependencies:
+      '@popperjs/core': ^2.11.8
 
   brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
@@ -1751,6 +1783,43 @@ packages:
   dargs@8.1.0:
     resolution: {integrity: sha512-wAV9QHOsNbwnWdNW2FYvE1P56wtgSbM+3SZcdGiWQILwVjACCXDCI3Ai8QlCjMDB8YK5zySiXZYBiwGmNY3lnw==}
     engines: {node: '>=12'}
+
+  datatables.net-bs5@2.2.2:
+    resolution: {integrity: sha512-0mAbpUf0EpnIEc0RlN6vSrSk9y/+NuReiwDpjHYY3RfzdvH6Lt0+7Q9OU5RIbYxaFxES/z60thxdrw7IUFnBhw==}
+
+  datatables.net-buttons-dt@3.2.2:
+    resolution: {integrity: sha512-K+sFw2V1GfZ/MzeU5yvbamosL0HrTCU2uiJeJBKhHppZE4e+y4bfJB0tTM3+QuUxPhyswaB3J/rN2Vg6Ec+ALQ==}
+
+  datatables.net-buttons@3.2.2:
+    resolution: {integrity: sha512-+aLTbkbksNmyGpK+8KXbpwYKXYOXvZQR2ySA/8oOQeJU53Xw/67cOHowenEr2d43/RLaz+I0zvV/1Yn+jMRiDw==}
+
+  datatables.net-colreorder@2.0.4:
+    resolution: {integrity: sha512-j2d2uObivMaMLX+VTsIu9XEfucMPuS+OYurezQtPNHo0LgdXdgKvouEAUghVtlkTxW+jX7tjiSbagH2YWIS5Jg==}
+
+  datatables.net-dt@2.2.2:
+    resolution: {integrity: sha512-Qfe9g/E3yAPTHoDASc1J0r5Yx++3Y3VdcEOFCupvfGJ8LhRrreebUC70UYEzO8vPOKnkutoRanW/VBMRIbXKXA==}
+
+  datatables.net-fixedheader@4.0.1:
+    resolution: {integrity: sha512-jdwvGvI/WBKjNDJ5JwcTqmh7ehLkzXmTqvVCWJ6ig3+P9EHasoTq6Ys08WfICXpCHZgDKwDYLiW2rqVLK5TWOg==}
+
+  datatables.net-responsive-bs5@3.0.4:
+    resolution: {integrity: sha512-/RufNJAFFmXkhfyBmXKfLlpopoKNkeDytMHHbsiBkoTRllJik9rtOON5NuMJOCL8sjwM2c+rUo/rzuXNk/70Qw==}
+
+  datatables.net-responsive@3.0.4:
+    resolution: {integrity: sha512-d1JKaWPRp81xydZrTDqrzGTloXthDtyvwbqiSKYUhDBKWTL4wN5IW5WYr4OBPwu21Ctpi/QgOl7mt9MfyF8KxA==}
+
+  datatables.net-rowreorder@1.5.0:
+    resolution: {integrity: sha512-Kkq57tdJHrUCYkS8vywhL5tqKtl2q3K3p8A6wkIdwMX2b8YVjtywhQbXvvVLZnlMQsdX194FXVK1AgAwcm4hFg==}
+
+  datatables.net-vue3@3.0.4:
+    resolution: {integrity: sha512-m7b7+zdH07d6J+Dz97KNs2PMezxZk+RgB4Or9i0J/SAXA/kaBRpQLTpr9Pyg8fh66/r4FQxnIkHhPTbW78Ep5A==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      datatables.net: ^2
+      vue: ^3.0.5
+
+  datatables.net@2.2.2:
+    resolution: {integrity: sha512-gfODIKE3gpgbVeZy2QGj2Dq9roO6hy00S+k1knklrqlMyAMrh1wt0Q6ryBUM7gU96U77ysbq8dYhxFdmcC/oPQ==}
 
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
@@ -2471,6 +2540,9 @@ packages:
   jiti@2.4.2:
     resolution: {integrity: sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==}
     hasBin: true
+
+  jquery@3.7.1:
+    resolution: {integrity: sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==}
 
   js-base64@3.7.7:
     resolution: {integrity: sha512-7rCnleh0z2CkXhH67J8K1Ytz0b2Y+yxTPL+/KOJoa20hfnVQ/3/T6W/KflYI4bRHRagNeXeU2bkNGI3v1oS/lw==}
@@ -3942,6 +4014,10 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
+  '@bhplugin/vue3-datatable@2.0.2(vue@3.5.13(typescript@5.8.2))':
+    dependencies:
+      vue: 3.5.13(typescript@5.8.2)
+
   '@commitlint/cli@19.8.0(@types/node@22.13.13)(typescript@5.8.2)':
     dependencies:
       '@commitlint/format': 19.8.0
@@ -4381,6 +4457,8 @@ snapshots:
   '@pkgr/core@0.2.0': {}
 
   '@polka/url@1.0.0-next.28': {}
+
+  '@popperjs/core@2.11.8': {}
 
   '@primeuix/styled@0.5.1':
     dependencies:
@@ -5064,17 +5142,6 @@ snapshots:
 
   adler-32@1.3.1: {}
 
-  ag-charts-types@11.2.1: {}
-
-  ag-grid-community@33.2.1:
-    dependencies:
-      ag-charts-types: 11.2.1
-
-  ag-grid-vue3@33.2.1(vue@3.5.13(typescript@5.8.2)):
-    dependencies:
-      ag-grid-community: 33.2.1
-      vue: 3.5.13(typescript@5.8.2)
-
   ajv@6.12.6:
     dependencies:
       fast-deep-equal: 3.1.3
@@ -5220,6 +5287,10 @@ snapshots:
   bluebird@3.4.7: {}
 
   boolbase@1.0.0: {}
+
+  bootstrap@5.3.5(@popperjs/core@2.11.8):
+    dependencies:
+      '@popperjs/core': 2.11.8
 
   brace-expansion@1.1.11:
     dependencies:
@@ -5535,6 +5606,62 @@ snapshots:
       type: 2.7.3
 
   dargs@8.1.0: {}
+
+  datatables.net-bs5@2.2.2:
+    dependencies:
+      datatables.net: 2.2.2
+      jquery: 3.7.1
+
+  datatables.net-buttons-dt@3.2.2:
+    dependencies:
+      datatables.net-buttons: 3.2.2
+      datatables.net-dt: 2.2.2
+      jquery: 3.7.1
+
+  datatables.net-buttons@3.2.2:
+    dependencies:
+      datatables.net: 2.2.2
+      jquery: 3.7.1
+
+  datatables.net-colreorder@2.0.4:
+    dependencies:
+      datatables.net: 2.2.2
+      jquery: 3.7.1
+
+  datatables.net-dt@2.2.2:
+    dependencies:
+      datatables.net: 2.2.2
+      jquery: 3.7.1
+
+  datatables.net-fixedheader@4.0.1:
+    dependencies:
+      datatables.net: 2.2.2
+      jquery: 3.7.1
+
+  datatables.net-responsive-bs5@3.0.4:
+    dependencies:
+      datatables.net-bs5: 2.2.2
+      datatables.net-responsive: 3.0.4
+      jquery: 3.7.1
+
+  datatables.net-responsive@3.0.4:
+    dependencies:
+      datatables.net: 2.2.2
+      jquery: 3.7.1
+
+  datatables.net-rowreorder@1.5.0:
+    dependencies:
+      datatables.net: 2.2.2
+      jquery: 3.7.1
+
+  datatables.net-vue3@3.0.4(datatables.net@2.2.2)(vue@3.5.13(typescript@5.8.2)):
+    dependencies:
+      datatables.net: 2.2.2
+      vue: 3.5.13(typescript@5.8.2)
+
+  datatables.net@2.2.2:
+    dependencies:
+      jquery: 3.7.1
 
   dayjs@1.11.13: {}
 
@@ -6302,6 +6429,8 @@ snapshots:
   isexe@2.0.0: {}
 
   jiti@2.4.2: {}
+
+  jquery@3.7.1: {}
 
   js-base64@3.7.7: {}
 
