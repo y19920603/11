@@ -81,6 +81,7 @@ function handleCloseSidebar() {
 .main-container {
   overflow-y: auto;
   height: calc(100vh - $navbar-height);
+  background: #1b1d29;
 }
 .layout {
   width: 100%;

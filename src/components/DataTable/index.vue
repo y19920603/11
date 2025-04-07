@@ -1,59 +1,94 @@
 <template>
-  <div class="container">
-    <ag-grid-vue
-      style="width: 100%; height: 500px"
-      :columnDefs="colDefs"
-      :rowData="rowData"
-      :pagination="pagination"
-      :paginationPageSize="paginationPageSize"
-      :paginationPageSizeSelector="paginationPageSizeSelector"
-    ></ag-grid-vue>
+  <div class="container custom-table">
+    <DataTable
+      v-model:selection="selectedProducts"
+      :value="rowData"
+      showGridlines
+      paginator
+      :rows="10"
+      :rowsPerPageOptions="[5, 10, 20, 50, 100]"
+      stripedRows
+      reorderableColumns
+      scrollable
+      scrollHeight="500px"
+    >
+      <template #header>
+        <div style="text-align: left">
+          <MultiSelect
+            v-model="selectedColumns"
+            :options="columns"
+            optionLabel="header"
+            @update:modelValue="onToggle"
+          />
+        </div>
+      </template>
+      <slot />
+    </DataTable>
   </div>
 </template>
+
 <script setup>
-import { ref } from "vue";
-import { AgGridVue } from "ag-grid-vue3";
+import { defineProps } from "vue";
+import DataTable from "primevue/datatable";
+import MultiSelect from "primevue/multiselect";
 
-const rowData = ref([
-  { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-  { make: "Ford", model: "F-Series", price: 33850, electric: false },
-  { make: "Toyota", model: "Corolla", price: 29600, electric: false },
-  { make: "Mercedes", model: "EQA", price: 48890, electric: true },
-  { make: "Fiat", model: "500", price: 15774, electric: false },
-  { make: "Nissan", model: "Juke", price: 20675, electric: false },
-  { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-  { make: "Ford", model: "F-Series", price: 33850, electric: false },
-  { make: "Toyota", model: "Corolla", price: 29600, electric: false },
-  { make: "Mercedes", model: "EQA", price: 48890, electric: true },
-  { make: "Fiat", model: "500", price: 15774, electric: false },
-  { make: "Nissan", model: "Juke", price: 20675, electric: false },
-  { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-  { make: "Ford", model: "F-Series", price: 33850, electric: false },
-  { make: "Toyota", model: "Corolla", price: 29600, electric: false },
-  { make: "Mercedes", model: "EQA", price: 48890, electric: true },
-  { make: "Fiat", model: "500", price: 15774, electric: false },
-  { make: "Nissan", model: "Juke", price: 20675, electric: false },
-  { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-  { make: "Ford", model: "F-Series", price: 33850, electric: false },
-  { make: "Toyota", model: "Corolla", price: 29600, electric: false },
-  { make: "Mercedes", model: "EQA", price: 48890, electric: true },
-  { make: "Fiat", model: "500", price: 15774, electric: false },
-  { make: "Nissan", model: "Juke", price: 20675, electric: false },
-  { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-  { make: "Ford", model: "F-Series", price: 33850, electric: false },
-  { make: "Toyota", model: "Corolla", price: 29600, electric: false },
-  { make: "Mercedes", model: "EQA", price: 48890, electric: true },
-  { make: "Fiat", model: "500", price: 15774, electric: false },
-  { make: "Nissan", model: "Juke", price: 20675, electric: false },
-]);
+const selectedProducts = ref([]);
+const selectedColumns = ref([]);
 
-const pagination = ref(true);
-const paginationPageSize = ref(10);
-const paginationPageSizeSelector = ref([5, 10, 50, 100, 1000]);
-const colDefs = ref([
-  { field: "make" },
-  { field: "model" },
-  { field: "price" },
-  { field: "electric" },
-]);
+// eslint-disable-next-line no-unused-vars
+const props = defineProps({
+  rowData: {
+    type: Array,
+    required: true,
+  },
+  columns: {
+    type: Array,
+    required: true,
+  },
+});
 </script>
+
+<style scoped lang="scss">
+.custom-table {
+  :deep(.p-datatable-header-cell) {
+    white-space: nowrap;
+    background: #2f3343;
+    color: #fff;
+    border-color: #2f3343;
+    font-size: 14px;
+    text-algn: "center";
+  }
+
+  :deep(.p-datatable-column-sorted .p-datatable-sort-icon) {
+    color: #fff;
+  }
+
+  :deep(.p-checkbox-box) {
+    background: #2f3343;
+  }
+
+  :deep(.p-checkbox-checked .p-checkbox-box) {
+    border-color: #625daf;
+    background: #8980fc;
+  }
+
+  :deep(.p-checkbox-checked:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-box) {
+    border-color: #625daf;
+    background: #8980fc;
+  }
+
+  :deep(.p-datatable-tbody > tr) {
+    background: #212330;
+  }
+
+  :deep(.p-datatable.p-datatable-striped .p-datatable-tbody > tr.p-row-odd) {
+    background: #1b1d29;
+  }
+
+  :deep(.p-datatable-tbody > tr > td) {
+    border-color: #404145;
+    color: #fff;
+    font-size: 14px;
+  }
+}
+</style>

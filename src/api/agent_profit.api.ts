@@ -9,6 +9,15 @@ const AgentProfitAPI = {
       params: queryParams,
     });
   },
+
+  DownloadPDF(queryParams?: { id: number }) {
+    return request<any, any>({
+      url: `/agent-profit/pdf`,
+      method: "get",
+      params: queryParams,
+      responseType: "blob",
+    });
+  },
 };
 
 export default AgentProfitAPI;

@@ -10,11 +10,6 @@ import "animate.css";
 import "default-passive-events";
 import "@mdi/font/css/materialdesignicons.css";
 
-import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
-
-// Register all Community features
-ModuleRegistry.registerModules([AllCommunityModule]);
-
 const app = createApp(App);
 app.use(setupPlugins);
 app.mount("#app");
