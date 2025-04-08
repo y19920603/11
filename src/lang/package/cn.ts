@@ -92,4 +92,5 @@ export default {
   SETTLEMENT_STATUS_UNSETTLED: "未结算",
   SETTLEMENT_STATUS_SETTLED: "已结算",
   MSG_DOWNLOAD_FAIL: "下载失败，请稍后重试！ ",
+  DATA_TABLE_LENGTH_MENU: "显示",
 };

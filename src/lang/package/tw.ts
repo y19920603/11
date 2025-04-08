@@ -92,4 +92,5 @@ export default {
   SETTLEMENT_STATUS_UNSETTLED: "未結算",
   SETTLEMENT_STATUS_SETTLED: "已結算",
   MSG_DOWNLOAD_FAIL: "下載失敗，請稍後重試！ ",
+  DATA_TABLE_LENGTH_MENU: "顯示",
 };

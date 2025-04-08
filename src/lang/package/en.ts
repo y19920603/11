@@ -92,4 +92,5 @@ export default {
   SETTLEMENT_STATUS_UNSETTLED: "Unsettled",
   SETTLEMENT_STATUS_SETTLED: "Settled",
   MSG_DOWNLOAD_FAIL: "Download failed, please try again later!",
+  DATA_TABLE_LENGTH_MENU: "Show",
 };

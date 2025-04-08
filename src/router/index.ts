@@ -28,11 +28,6 @@ export const constantRoutes: RouteRecordRaw[] = [
         },
       },
       {
-        path: "agent-profit-list",
-        component: () => import("@/views/pages/agent-profit-list.vue"),
-        name: "agent-profit-list",
-      },
-      {
         path: "404",
         component: () => import("@/views/error/404.vue"),
         meta: { hidden: true },

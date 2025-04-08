@@ -10,7 +10,7 @@ const AgentProfitAPI = {
     });
   },
 
-  DownloadPDF(queryParams?: { id: number }) {
+  DownloadPDF(queryParams?: { id: string }) {
     return request<any, any>({
       url: `/agent-profit/pdf`,
       method: "get",
