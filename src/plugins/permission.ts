@@ -6,7 +6,7 @@ import { usePermissionStore, useUserStore } from "@/store";
 
 export function setupPermission() {
   // 白名单路由
-  const whiteList = ["/login", "/agent-profit-list"];
+  const whiteList = ["/login"];
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
 
