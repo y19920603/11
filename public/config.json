@@ -1,0 +1,5 @@
+{
+    "MAX_IMAGE_SIZE_MB": 3,
+    "MAX_DATE_TIME": "2038-01-01 00:00:00",
+    "EXPORT_FILE_URL": "http://192.168.1.221:8039"
+}

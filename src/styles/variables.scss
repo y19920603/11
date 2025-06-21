@@ -39,17 +39,41 @@
     --el-table-current-row-bg-color: rgb(235 243 250);
   }
   --navbar-height: 70px;
+
+  --el-input-hover-border-color: #6c6e72;
+  .el-pager {
+    --el-pagination-hover-color: #8480ff;
+  }
 }
 
 /** 浅色主题-深蓝色侧边栏配色 */
 html.sidebar-color-blue {
-  --menu-background: #304156; // 菜单背景色
-  --menu-text: #bfcbd9; // 菜单文字颜色
+  --menu-background: #fffdfd; // 菜单背景色
+  --menu-text: #263445; // 菜单文字颜色
   --menu-active-text: var(--el-menu-active-color); // 菜单激活文字颜色
   --menu-hover: #263445; // 菜单悬停背景色
   --sidebar-logo-background: #2d3748; // 侧边栏 Logo 背景色
   --sidebar-logo-text-color: #fff; // 侧边栏 Logo 文字颜色
-  --el-bg-color: #242735;
+  --el-bg-color: #fffdfd;
+  --bg-contain: #fffdfd;
+  --bg-settings: #fffdfd;
+  --bg-tag: #fffdfd;
+  --tag-border-active: 1px solid #ececec;
+  --tag-border-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --el-sub-menu-title-hover: #9497ee;
+  --el-sub-menu-title-active: #263445;
+  --router-link-active: #263445;
+  --breadcrumb-text: #000;
+  --datatable-tr: #ececec;
+  --datatable-th: #fffdfd;
+  --datatable-text: #888888;
+  --datatable-border-color: #d9d7d7;
+  --button-text-color: #fff;
+  --bg-success: #50c38e;
+  --text-success: #fff;
+  --bg-error: #e96e6e;
+  --text-error: #fff;
+  --el-date-btn-hover-bg: #8e91eb;
 }
 
 /** 暗黑主题 */
@@ -60,6 +84,25 @@ html.dark {
   --menu-hover: rgb(0 0 0 / 20%);
   --sidebar-logo-background: rgb(0 0 0 / 20%);
   --sidebar-logo-text-color: #fff;
+  --el-bg-color: #242735;
+  --bg-contain: #1b1d29;
+  --bg-settings: #2e3343;
+  --bg-tag: #1b1d29;
+  --tag-border-shadow: none;
+  --tag-border-active: none;
+  --el-sub-menu-title-hover: #19191f;
+  --el-sub-menu-title-active: #fff;
+  --router-link-active: #fff;
+  --breadcrumb-text: #fff;
+  --datatable-tr: #212330;
+  --datatable-th: #2f3343;
+  --datatable-border-color: #2a2d3c;
+  --datatable-text: #fff;
+  --button-text-color: #404145;
+  --bg-success: #34494a;
+  --text-success: #50c38e;
+  --bg-error: #4a3434;
+  --text-error: #c35050;
 }
 
 $menu-background: var(--menu-background); // 菜单背景色

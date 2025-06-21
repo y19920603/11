@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  poker_cms_frontend:
+    image: "192.168.1.202:5001/poker_cms_web:${TAG}"
+    container_name: poker_cms_frontend
+    ports:
+      - "80:80"
+    environment:
+      - API_HOST=pokercmsapi_gateway
+      - API_PORT=8039
+    restart: always
+    networks:
+      - pokercms_network
+
+networks:
+  pokercms_network:
+    external: true
+    name: pokercms_network

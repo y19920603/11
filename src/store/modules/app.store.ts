@@ -1,7 +1,6 @@
 import defaultSettings from "@/settings";
 
 // 导入 Element Plus 中英文语言包
-import zhCn from "element-plus/es/locale/lang/zh-cn";
 import en from "element-plus/es/locale/lang/en";
 import { store } from "@/store";
 import { DeviceEnum } from "@/enums/settings/device.enum";
@@ -28,11 +27,7 @@ export const useAppStore = defineStore("app", () => {
    * 根据语言标识读取对应的语言包
    */
   const locale = computed(() => {
-    if (language?.value == "en") {
-      return en;
-    } else {
-      return zhCn;
-    }
+    return en;
   });
 
   // 切换侧边栏
@@ -71,7 +66,7 @@ export const useAppStore = defineStore("app", () => {
    *
    * @param val
    */
-  function changeLanguage(val: string) {
+  function changeLanguage(val: number) {
     language.value = val;
   }
   /**

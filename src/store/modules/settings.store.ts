@@ -8,6 +8,8 @@ type SettingsValue = boolean | string;
 export const useSettingsStore = defineStore("setting", () => {
   // 基本设置
   const settingsVisible = ref(false);
+
+  const isMultiScreen = ref(false);
   // 标签视图
   const tagsView = useStorage<boolean>("tagsView", defaultSettings.tagsView);
   // 侧边栏 Logo
@@ -79,6 +81,10 @@ export const useSettingsStore = defineStore("setting", () => {
     layout.value = val;
   }
 
+  function changeMultiScreen() {
+    isMultiScreen.value = !isMultiScreen.value;
+  }
+
   return {
     settingsVisible,
     tagsView,
@@ -93,5 +99,7 @@ export const useSettingsStore = defineStore("setting", () => {
     changeThemeColor,
     changeLayout,
     changeSidebarColor,
+    isMultiScreen,
+    changeMultiScreen,
   };
 });

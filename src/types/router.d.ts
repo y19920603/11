@@ -50,5 +50,9 @@ declare module "vue-router" {
      * @default false
      */
     breadcrumb?: boolean;
+
+    sidebar_sort?: number;
+
+    function_code?: string;
   }
 }

@@ -2,77 +2,99 @@
 <template>
   <PageTitle title="AGENT_PROFIT"></PageTitle>
   <div class="py-4 px-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-      <template v-for="(item, index) of summaryAry" :key="index">
-        <div class="flex bg-[url('/src/assets/dashboard/bg.png')] p-8 rounded-xl m-4 flex-col">
-          <div class="flex justify-center items-center flex-col-reverse md:flex-row">
-            <div
-              class="flex flex-col justify-center items-center mt-2 md:items-start text-[#ADB5BD] text-base"
-            >
-              <div>{{ $t(`AGENT_PROFIT_${item.title}`) }}</div>
-              <div class="">${{ item.value }}</div>
-              <div class="">
-                <span v-if="labelText">{{ $t(`AGENT_PROFIT_${labelText}`) }}</span>
-                ${{ item.previous }}
-              </div>
-            </div>
-            <div class="flex-1"></div>
-            <div class="w-[100px] h-[80px]">
-              <div
-                class="w-[100px] h-[80px] bg-no-repeat bg-center bg-contain"
-                :style="{ backgroundImage: `url('/src/assets/agent/${item.imageSrc}.png')` }"
-              ></div>
-            </div>
-          </div>
-          <div
-            class="flex space-x-2 justify-center md:justify-start"
-            :class="{
-              'text-[#34c38f]': item.trend === 0,
-              'text-[#f46a6a]': item.trend === 1,
-              'text-[#f1b44c]': item.trend === 2,
-            }"
-          >
-            <i
-              class="mdi"
-              :class="{
-                'mdi-arrow-up-bold': item.trend === 0,
-                'mdi-arrow-down-bold': item.trend === 1,
-                'mdi-minus': item.trend === 2,
-              }"
-            ></i>
-            <div>{{ item.increase }}</div>
-            <div class="text-[#ADB5BD]">{{ $t(`AGENT_PROFIT_SINCE_${labelText}`) }}</div>
-          </div>
-        </div>
-      </template>
-    </div>
+    <PageSummary :items="summaryAry" :date_mode="queryParams.date_mode" />
   </div>
   <div class="p-8">
     <DataTable
-      :rowData="agentProfit"
+      :rowData="dataAry"
       :columns="columns"
+      :records_total="total"
+      :queryParams="queryParams"
+      :excelFileName="'profit_table'"
       :excelApiUrl="'/agent-profit/excel'"
-      :recordsTotal="total"
       @updateDataTable="updateDataTable"
-    />
+    >
+      <template #dateFilter>
+        <DateTimeFilter
+          :startDateTime="queryParams.start_datetime"
+          :endDateTime="queryParams.end_datetime"
+          :dateMode="queryParams.date_mode"
+          @updateDateTime="updateDataTable"
+        />
+      </template>
+      <template #searchFilter>
+        <el-select
+          v-model="incomeType"
+          :placeholder="$t('AGENT_PROFIT_INCOME_TYPE')"
+          size="large"
+          class="min-w-[160px]!"
+          :clearable="true"
+        >
+          <el-option
+            v-for="item in incomeTypes"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+
+        <el-popover
+          class="box-item"
+          :width="220"
+          :content="$t('AGENT_PROFIT_SEARCH_POPOVER_CONTENT')"
+          placement="top-start"
+        >
+          <template #reference>
+            <el-input
+              v-model="queryParams.search"
+              class="h-[40px]! min-w-[220px]"
+              size="large"
+              :placeholder="$t('AGENT_PROFIT_KEY_SEARCH_PLACEHOLDER')"
+            ></el-input>
+          </template>
+        </el-popover>
+        <div class="flex space-x-2">
+          <SearchButtons @reset="resetSearch" @search="updateDataTable" />
+        </div>
+      </template>
+    </DataTable>
   </div>
 </template>
 <script setup lang="ts">
 import dayjs from "dayjs";
 import $ from "jquery";
 
-import AgentProfitAPI, {
-  AgentProfitPageQuery,
-  AgentProfitVO,
-  SummaryItemVO,
-} from "@/api/agent_profit.api";
+import AgentProfitAPI, { AgentProfitPageQuery, AgentProfitVO } from "@/api/agent_profit.api";
+import downloadPDFUtil from "@/utils/pdf";
+import { useIncomeTypes } from "@/utils/incomeTypes";
+import { SummaryItemVO } from "@/api/types/summary";
+import { getDataErrorAlert } from "@/utils/message";
+import { useLoadingStore } from "@/store";
+import pdf from "@/assets/images/download.png";
+import getGoldImg from "@/utils/goldImg";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
-const loading = ref(false);
+const incomeType = computed({
+  get: () => {
+    return queryParams.income_type ?? "";
+  },
+  set: (newValue) => {
+    queryParams.income_type = newValue;
+  },
+});
+const incomeTypes = ref(useIncomeTypes(t));
+
+watch(locale, () => {
+  columns.value = getColumns();
+  incomeTypes.value = useIncomeTypes(t);
+  updateDataTable({}, false);
+});
+
+const { setLoading } = useLoadingStore();
 const total = ref(0);
 const summaryAry = ref<SummaryItemVO[]>([] as SummaryItemVO[]);
-const agentProfit = ref<AgentProfitVO[]>([] as AgentProfitVO[]);
+const dataAry = ref<AgentProfitVO[]>([] as AgentProfitVO[]);
 const queryParams = reactive<AgentProfitPageQuery>({
   start_datetime: `${dayjs().format("YYYY-MM-DD")} 00:00:00`,
   end_datetime: `${dayjs().format("YYYY-MM-DD")} 23:59:59`,
@@ -85,13 +107,24 @@ const queryParams = reactive<AgentProfitPageQuery>({
   income_type: null,
 });
 
-const updateDataTable = (data: any) => {
+const updateDataTable = (data: any = {}, restart: boolean = true) => {
+  if (restart) {
+    data = { ...data, start: 0 };
+  }
   Object.assign(queryParams, data);
   handleQuery();
 };
 
-const columns = [
+const resetSearch = () => {
+  Object.assign(queryParams, {
+    search: null,
+    income_type: null,
+  });
+};
+
+const getColumns = () => [
   { data: "null" },
+  { data: "id", visible: false },
   { data: "ga_name", title: t("AGENT_PROFIT_GA_NAME") },
   { data: "ga_company_name", title: t("AGENT_PROFIT_GA_COMPANY_NAME") },
   { data: "agent_name", title: t("AGENT_PROFIT_AGENT_NAME") },
@@ -106,219 +139,164 @@ const columns = [
     data: "income_split",
     title: t("AGENT_PROFIT_INCOME_SPLIT"),
   },
-  { data: "income_type", title: t("AGENT_PROFIT_INCOME_TYPE") },
+  { data: "income_type_name", title: t("AGENT_PROFIT_INCOME_TYPE") },
   {
     data: "agent_split_gold",
     title: t("AGENT_PROFIT_AGENT_SPLIT_GOLD"),
-    render: (data: string) => {
+    className: "text-right!",
+    render: (data: string, _name: string, row: AgentProfitVO) => {
+      if (row.income_type === 3)
+        return `
+          <span class="text-red">--</span>
+        `;
       return `
-        <span class="${parseFloat(data) < 0 ? "red" : "text-[#59AFFF]"}">${data}</span>
-      `;
+          <span class="text-[#59AFFF]">${data}</span>
+        `;
     },
   },
   {
     data: "agent_split_gold_del",
     title: t("AGENT_PROFIT_AGENT_SPLIT_GOLD_DEL"),
-    render: (data: string) => {
+    className: "text-right!",
+    render: (data: string, _name: string, row: AgentProfitVO) => {
+      if (row.income_type === 3)
+        return `
+        <span class="text-[#59AFFF]">${data}</span>
+        `;
       return `
-      <div class="text-right">
-        ${
-          data === "--"
-            ? data
-            : `<span class="${parseFloat(data) < 0 ? "red" : "text-[#59AFFF]"}">${data}</span>`
-        }
-      </div>
-    `;
+        <span class="text-red">--</span>
+        `;
     },
   },
   {
-    data: "gold_type",
+    data: "gold_type_name",
     title: t("AGENT_PROFIT_GOLD_TYPE"),
-    align: "center",
-    render: (data: number) => {
-      let html = "";
-      switch (data) {
-        case 0:
-          html = `<div class="text-center"><img src="/src/assets/agent/tcoin.png" alt="" height="35px" width="35px" />
-                  <div>${t("GOLD_TYPE_EXPERIENCE_COINS")}</div></div>`;
-          break;
-        case 1:
-          html = `<div class="text-center"><img src="/src/assets/agent/money.png" alt="" height="35px" width="35px" />
-                  <div>${t("GOLD_TYPE_DOLLARS")}</div></div>`;
-          break;
-        case 2:
-          html = `<div class="text-center"><img src="/src/assets/agent/bet_clip.png" alt="" height="35px" width="35px" />
-                  <div>${t("GOLD_TYPE_CHIPS")}</div></div>`;
-          break;
-        case 3:
-          html = `<div class="text-center"><img src="/src/assets/agent/diamond.png" alt="" height="35px" width="35px" />
-                  <div>${t("GOLD_TYPE_DIAMONDS")}</div></div>`;
-          break;
-        default:
-          html = `<div class="text-center">${data}</div>`;
-          break;
-      }
-      return html;
-    },
+    className: "text-center!",
+    render: (data: string, _name: string, row: AgentProfitVO) => `<div class="text-center">
+              <img src="${getGoldImg(row.gold_type.toString())}" alt="" height="35px" width="35px" />
+              <div>${data ?? ""}</div>
+        </div>`,
   },
   {
-    data: "sea_type",
+    data: "round_belong",
     title: t("AGENT_PROFIT_SEA_TYPE"),
-    render: (_data: number, _name: string, row: AgentProfitVO) => {
-      return `<div class="text-center">${getSeaTable(row)}</div>`;
-    },
-  },
-  {
-    data: "settlement_status",
-    title: t("AGENT_PROFIT_SETTLEMENT_STATUS"),
-    render: (data: number) => {
-      if (data === 0) {
-        return `
-          <div class="rounded-full px-1 text-center" style="color: #666666; background-color: #cccccc">
-            ${t("SETTLEMENT_STATUS_UNSETTLED")}
-          </div>
-        `;
-      } else if (data === 1) {
-        return `
-          <div class="rounded-full px-1 text-center" style="color: #50c38e; background-color: #34494a">
-            ${t("SETTLEMENT_STATUS_SETTLED")}
-          </div>
-        `;
-      } else {
-        return `<div>${data}</div>`;
-      }
-    },
-  },
-  { data: "create_time", title: t("AGENT_PROFIT_CREATE_TIME") },
-  {
-    data: "id",
-    title: t("AGENT_PROFIT_PDF"),
-    orderable: false,
+    className: "text-center!",
     render: (data: string) => {
+      const dataAry = data.split("/");
+      return `<div class="flex-col justify-center items-center">
+                <div>${dataAry[0]}/${dataAry[1]}</div>
+                <div>${dataAry[2]}</div>
+      </div>`;
+    },
+  },
+  {
+    data: "settlement_status_name",
+    title: t("AGENT_PROFIT_SETTLEMENT_STATUS"),
+    className: "text-center!",
+    render: (data: number, _name: string, _row: AgentProfitVO) => {
       return `
-      <div class="text-center cursor-pointer pdf_download" data-id="${data}">
-        <img src="/src/assets/agent/download.png" alt="" height="35px" width="35px" />
+            <div class="rounded-full w-fit px-5 py-1 m-auto text-center ${!_row.settlement_status ? "bg-[--bg-error] text-[--text-error]" : "bg-[--bg-success] text-[--text-success]"}" >
+              ${data}
+            </div>
+          `;
+    },
+  },
+  {
+    data: "create_time",
+    title: t("AGENT_PROFIT_CREATE_TIME"),
+    render: (data: string) => {
+      const date = data.split(" ");
+      return `<div class='flex flex-col justify-start'>
+        <span>${date[0]}</span>
+        <span>${date[1]}</span>
+      </div>`;
+    },
+  },
+  {
+    data: "",
+    title: t("AGENT_PROFIT_PDF"),
+    className: "text-center!",
+    orderable: false,
+    render: (_data: number, _name: string, row: AgentProfitVO) => {
+      return `
+      <div class="text-center cursor-pointer pdf_download" data-id="${row.id}">
+        <img src="${pdf}" alt="" height="35px" width="35px" />
       </div>
     `;
     },
   },
 ];
-
-const getSeaTable = (row: AgentProfitVO) => {
-  const getSeaText = (seaType: number, gameNickname: string): string => {
-    switch (seaType) {
-      case 0:
-        return `${t("SEA_TYPE_PRIVATE_SEA")} / ${gameNickname}`;
-      case 1:
-        return `${t("SEA_TYPE_PUBLIC_SEA")} / ${gameNickname}`;
-      default:
-        return seaType.toString();
-    }
-  };
-
-  const getTableText = (tableType: number): string => {
-    switch (tableType) {
-      case 0:
-        return t("TABLE_TYPE_PRIVATE_TABLE");
-      case 1:
-        return t("TABLE_TYPE_PUBLIC_TABLE");
-      default:
-        return tableType.toString();
-    }
-  };
-
-  const sea_text = getSeaText(row.sea_type, row.game_nickname);
-  const table_text = getTableText(row.table_type);
-
-  return `<div class="text-nowrap">${sea_text}</div><div>${table_text}</div>`;
-};
-
-const labelText = computed(() => {
-  switch (queryParams.date_mode) {
-    case "D":
-      return "YESTERDAY";
-    case "W":
-      return "LAST_WEEK";
-    case "M":
-      return "LAST_MONTH";
-    default:
-      return "";
-  }
-});
+const columns = ref(getColumns());
 
 const downloadPDF = (id: string) => {
-  loading.value = true;
-
-  AgentProfitAPI.DownloadPDF({ id })
-    .then((response) => {
-      const blob = new Blob([response], { type: "application/pdf" });
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.setAttribute("download", `agent-profit_${id}.pdf`); // 動態設置文件名
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    })
-    .catch((error) => {
-      ElMessageBox.alert(`${t("MSG_DOWNLOAD_FAIL")}`);
-      console.error("下載 PDF 失敗：", error);
-    })
-    .finally(() => {
-      loading.value = false;
-    });
+  downloadPDFUtil("/agent-profit/pdf", { id }, "agent-profit");
 };
 
 function handleQuery() {
-  loading.value = true;
+  setLoading(true);
   AgentProfitAPI.getAgentProfitData(queryParams)
-    .then(({ result, data, summary, recordsTotal }) => {
+    .then(({ result, data, summary, records_total }) => {
       if (result) {
-        agentProfit.value = data;
-        total.value = recordsTotal;
+        dataAry.value = data;
+        total.value = records_total;
         summaryAry.value = [
+          // {
+          //   title: "AGENT_PROFIT_PRE_REVENUE_SHARE",
+          //   value: `$${summary.income_gold}`,
+          //   previous: `$${summary.income_gold_previous}`,
+          //   increase: summary.income_gold_increase,
+          //   trend: summary.split_gold_trend,
+          //   imageSrc: "poker",
+          // },
           {
-            title: "PRE_REVENUE_SHARE",
-            value: summary.income_gold,
-            previous: summary.income_gold_previous,
-            increase: summary.income_gold_increase,
-            trend: summary.split_gold_trend,
-            imageSrc: "poker",
-          },
-          {
-            title: "POST_REVENUE_SHARE",
-            value: summary.agent_split_gold,
-            previous: summary.agent_split_gold_previous,
-            increase: summary.agent_split_gold_increase,
-            trend: summary.agent_split_gold_trend,
-            imageSrc: "poker2",
-          },
-          {
-            title: "AGENT_PRE_REVENUE_SHARE",
-            value: summary.split_gold,
-            previous: summary.split_gold_previous,
+            title: "AGENT_PROFIT_AGENT_PRE_REVENUE_SHARE",
+            value: `$${summary.split_gold}`,
+            previous: `$${summary.split_gold_previous}`,
             increase: summary.split_gold_increase,
             trend: summary.split_gold_trend,
             imageSrc: "poker2",
           },
+
+          {
+            title: "AGENT_PROFIT_POST_REVENUE_SHARE",
+            value: `$${summary.agent_split_gold}`,
+            previous: `$${summary.agent_split_gold_previous}`,
+            increase: summary.agent_split_gold_increase,
+            trend: summary.agent_split_gold_trend,
+            imageSrc: "poker2",
+          },
         ];
-        agentProfit.value = data;
       }
     })
     .catch(() => {
-      ElMessageBox.alert(`${t("MSG_GET_DATA_FAIL", { page: t("PAGE_AGENT_PROFIT") })}`);
+      getDataErrorAlert(t, "PAGE_AGENT_PROFIT");
     })
     .finally(() => {
-      loading.value = false;
+      setLoading(false);
     });
 }
+const route = useRoute();
+const bindingEvent = () => {
+  $("body")
+    .off("click", `#tab_${route.query.tabId || route.meta.id}_wrapper .pdf_download`)
+    .on(
+      "click",
+      `#tab_${route.query.tabId || route.meta.id}_wrapper .pdf_download`,
+      // eslint-disable-next-line no-unused-vars
+      function (this: HTMLElement) {
+        const element = this as HTMLDivElement;
+        const id = $(element).data("id");
+        downloadPDF(id);
+      }
+    );
+};
+
 onMounted(() => {
   handleQuery();
-  // eslint-disable-next-line no-unused-vars
-  $("body").on("click", ".pdf_download", function (this: HTMLElement) {
-    const element = this as HTMLDivElement;
-    const id = $(element).data("id");
-    downloadPDF(id);
-  });
+  bindingEvent();
+});
+
+onActivated(() => {
+  bindingEvent();
 });
 </script>

@@ -1,6 +1,6 @@
 export const useTagsViewStore = defineStore("tagsView", () => {
-  const visitedViews = ref<TagView[]>([]);
-  const cachedViews = ref<string[]>([]);
+  const visitedViews = useStorage<TagView[]>("visitedViews", []);
+  const cachedViews = useStorage<string[]>("cachedViews", []);
   const router = useRouter();
   const route = useRoute();
 
@@ -8,35 +8,38 @@ export const useTagsViewStore = defineStore("tagsView", () => {
    * 添加已访问视图到已访问视图列表中
    */
   function addVisitedView(view: TagView) {
-    // 如果已经存在于已访问的视图列表中或者是重定向地址，则不再添加
-    if (view.path.startsWith("/redirect")) {
+    if (
+      view.path.startsWith("/redirect") ||
+      view.path.startsWith("/dashboard") ||
+      view.path === "/"
+    ) {
       return;
     }
-    if (visitedViews.value.some((v) => v.name === view.name)) {
-      return;
-    }
-    // 如果视图是固定的（affix），则在已访问的视图列表的开头添加
-    if (view.affix) {
-      visitedViews.value.unshift(view);
+
+    const index = visitedViews.value.findIndex((v) => v.fullPath === view.fullPath);
+
+    if (index > -1) {
+      visitedViews.value[index] = { ...visitedViews.value[index], ...view };
     } else {
-      // 如果视图不是固定的，则在已访问的视图列表的末尾添加
       visitedViews.value.push(view);
     }
+  }
+
+  function forceAddVisitedView(view: TagView) {
+    if (view.path.startsWith("/redirect")) return;
+    if (visitedViews.value.some((v) => v.fullPath === view.fullPath)) return;
+
+    visitedViews.value.push(view);
   }
 
   /**
    * 添加缓存视图到缓存视图列表中
    */
   function addCachedView(view: TagView) {
-    const viewName = view.name;
-    // 如果缓存视图名称已经存在于缓存视图列表中，则不再添加
-    if (cachedViews.value.includes(viewName)) {
-      return;
-    }
-
-    // 如果视图需要缓存（keepAlive），则将其路由名称添加到缓存视图列表中
+    const cacheKey = view.fullPath; // ✅ 改用 fullPath 做唯一鍵
+    if (cachedViews.value.includes(cacheKey)) return;
     if (view.keepAlive) {
-      cachedViews.value.push(viewName);
+      cachedViews.value.push(cacheKey);
     }
   }
 
@@ -46,8 +49,7 @@ export const useTagsViewStore = defineStore("tagsView", () => {
   function delVisitedView(view: TagView) {
     return new Promise((resolve) => {
       for (const [i, v] of visitedViews.value.entries()) {
-        // 找到与指定视图路径匹配的视图，在已访问视图列表中删除该视图
-        if (v.path === view.path) {
+        if (v.fullPath === view.fullPath) {
           visitedViews.value.splice(i, 1);
           break;
         }
@@ -57,15 +59,16 @@ export const useTagsViewStore = defineStore("tagsView", () => {
   }
 
   function delCachedView(view: TagView) {
-    const viewName = view.name;
+    const cacheKey = view.fullPath;
     return new Promise((resolve) => {
-      const index = cachedViews.value.indexOf(viewName);
+      const index = cachedViews.value.indexOf(cacheKey);
       if (index > -1) {
         cachedViews.value.splice(index, 1);
       }
       resolve([...cachedViews.value]);
     });
   }
+
   function delOtherVisitedViews(view: TagView) {
     return new Promise((resolve) => {
       visitedViews.value = visitedViews.value.filter((v) => {
@@ -90,9 +93,11 @@ export const useTagsViewStore = defineStore("tagsView", () => {
   }
 
   function updateVisitedView(view: TagView) {
+    if (visitedViews.value.flatMap((e) => e.fullPath).includes(view.fullPath)) return;
+
     for (let v of visitedViews.value) {
-      if (v.path === view.path) {
-        v = Object.assign(v, view);
+      if (v.fullPath === selectedFullPath.value) {
+        Object.assign(v, view);
         break;
       }
     }
@@ -207,30 +212,43 @@ export const useTagsViewStore = defineStore("tagsView", () => {
     };
     delView(tags).then((res: any) => {
       if (isActive(tags)) {
-        toLastView(res.visitedViews, tags);
+        toLastView(res.visitedViews);
       }
     });
   }
 
   function isActive(tag: TagView) {
-    return tag.path === route.path;
+    return tag.fullPath === route.fullPath;
   }
 
-  function toLastView(visitedViews: TagView[], view?: TagView) {
+  const selectedFullPath = ref("");
+  watch(
+    () => route.fullPath,
+    (newFullPath, oldFullRoute) => {
+      selectedFullPath.value = oldFullRoute ?? "";
+    },
+    {
+      immediate: true,
+    }
+  );
+
+  function toLastView(visitedViews: TagView[]) {
     const latestView = visitedViews.slice(-1)[0];
     if (latestView && latestView.fullPath) {
       router.push(latestView.fullPath);
     } else {
-      // now the default is to redirect to the home page if there is no tags-view,
-      // you can adjust it according to your needs.
-      if (view?.name === "Dashboard") {
-        // to reload home page
-        router.replace("/redirect" + view.fullPath);
-      } else {
-        router.push("/");
-      }
+      router.push("/dashboard");
     }
   }
+
+  watch(
+    () => visitedViews.value.length,
+    (newLen) => {
+      if (newLen === 0) {
+        router.push("/dashboard");
+      }
+    }
+  );
 
   return {
     visitedViews,
@@ -253,5 +271,6 @@ export const useTagsViewStore = defineStore("tagsView", () => {
     closeCurrentView,
     isActive,
     toLastView,
+    forceAddVisitedView,
   };
 });

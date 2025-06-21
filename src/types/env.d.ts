@@ -8,8 +8,6 @@ interface ImportMetaEnv {
   VITE_APP_BASE_API: string;
   /** API 地址 */
   VITE_APP_API_URL: string;
-  /** 是否开启 Mock 服务 */
-  VITE_MOCK_DEV_SERVER: boolean;
 }
 
 interface ImportMeta {
@@ -23,11 +21,6 @@ declare const __APP_INFO__: {
   pkg: {
     name: string;
     version: string;
-    engines: {
-      node: string;
-    };
-    dependencies: Record<string, string>;
-    devDependencies: Record<string, string>;
   };
   buildTimestamp: number;
 };

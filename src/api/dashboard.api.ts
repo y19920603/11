@@ -1,10 +1,9 @@
 import request from "@/utils/request";
 
 const DashBoardAPI = {
-  /** 获取角色分页数据 */
   getDashBoardData(queryParams?: DashBoardPageQuery) {
     return request<any, DashBoardPageVO>({
-      url: `/dashboard/list`,
+      url: `/report/dashboard/list`,
       method: "get",
       params: queryParams,
     });

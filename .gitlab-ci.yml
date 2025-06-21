@@ -1,56 +1,142 @@
-variables:
-  SUDO_PASSWORD: "90357971"
-
 stages:
   - build
   - deploy
+  - deploy-beta
 
-default:
-  cache:
-    paths:
-      - node_modules/
+variables:
+  REGISTRY_SERVER: "192.168.1.202:5001"
 
-
-# 構建應用
 build:
   stage: build
-
   script:
-    - echo "當前工作目錄 $(pwd)"
-    - echo "項目文件列表：$(ls -al)"
-    - echo "檢查 package.json 是否存在：$(ls -al package.json)"
-    #- yarn install
-    - yarn build
-  artifacts:
-    paths:
-      - dist/
-    expire_in: 1 week
-  only:
-    - dev
+    # Install Docker CLI if missing
+    - "which docker || ( apt-get update -y && apt-get install -y docker.io )"
 
-# 部署到遠端服務器
+    # 根據 tag 決定 DOCKER_IMAGE 和 FINAL_IMAGE
+    - |
+      if [[ "$CI_COMMIT_TAG" == *-pro ]]; then
+        export DOCKER_IMAGE="pro/poker_cms_web"
+      else
+        export DOCKER_IMAGE="poker_cms_web"
+      fi
+      export FINAL_IMAGE="$REGISTRY_SERVER/$DOCKER_IMAGE:$CI_COMMIT_TAG"
+
+    # Build Docker image
+    - docker build --no-cache -f Dockerfile --build-arg VITE_APP_VERSION=$CI_COMMIT_TAG -t $DOCKER_IMAGE .
+
+    # Tag the image for the registry
+    - docker tag $DOCKER_IMAGE:latest $FINAL_IMAGE
+
+    # Push the image to the registry
+    - docker push $FINAL_IMAGE
+
+  only:
+    - tags
+
 deploy:
   stage: deploy
-
   script:
-    - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
-    - eval $(ssh-agent -s)
+    - export DOCKER_IMAGE="poker_cms_web"
+    - export FINAL_IMAGE="$REGISTRY_SERVER/$DOCKER_IMAGE:$CI_COMMIT_TAG"
 
-    # 添加私鑰
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > /tmp/private_key
+    # SSH setup
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" > /tmp/private_key
     - chmod 600 /tmp/private_key
     - ssh-add /tmp/private_key
-
-    # 確保目錄存在
     - mkdir -p ~/.ssh
+    - ssh-keyscan 192.168.1.221 >> ~/.ssh/known_hosts
 
-    - echo "$CI_COMMIT_BRANCH - Ensuring remote directories exist..."
-    - echo $SUDO_PASSWORD | ssh skyray@192.168.1.202 "sudo -S mkdir -p /var/www/${CI_COMMIT_BRANCH}/poker_cms_web/ && sudo chown -R skyray:skyray /var/www/${CI_COMMIT_BRANCH}/poker_cms_web"
+    # Pull image
+    - echo "Pulling latest image on remote server..."
+    - ssh skyray@192.168.1.221 "docker pull $FINAL_IMAGE"
 
-    # 添加遠程主機到 known_hosts
-    - ssh-keyscan 192.168.1.202 >> ~/.ssh/known_hosts
+    # Stop & remove old container
+    - echo "Stopping old container if exists..."
+    - ssh skyray@192.168.1.221 '
+      CONTAINER_ID=$(docker ps -q --filter name=poker_cms_frontend);
+      if [ -n "$CONTAINER_ID" ]; then
+      docker rm -f $CONTAINER_ID;
+      else
+      echo "No running container named poker_cms_frontend found.";
+      fi
+      '
 
-    - echo "開始部署到遠端服務器..."
-    - scp -r dist/ skyray@192.168.1.202:/var/www/${CI_COMMIT_BRANCH}/poker_cms_web/
+    # Update .env on remote
+    - echo "Updating FRONTEND_VERSION in .env..."
+    - ssh skyray@192.168.1.221 "
+      sed -i \"s/^FRONTEND_VERSION=.*/FRONTEND_VERSION=$CI_COMMIT_TAG/\" ~/web/dev/.env
+      "
+
+    # Restart with docker compose
+    - echo "Starting container with docker-compose..."
+    - ssh skyray@192.168.1.221 "cd ~/web/dev && docker compose up -d poker_cms_frontend"
+
+    # Cleanup old images
+    - echo "Cleaning up old images..."
+    - |
+      ssh skyray@192.168.1.221 '
+        TAG_TO_KEEP="'$CI_COMMIT_TAG'"
+        docker images --format "{{.Repository}} {{.Tag}} {{.ID}}" \
+        | grep "192.168.1.202:5001/poker_cms_web" \
+        | grep -v "$TAG_TO_KEEP" \
+        | grep -v "latest" \
+        | awk "{print \$3}" \
+        | xargs -r docker rmi || true
+      '
   only:
-    - dev
+    - /^v\d+\.\d+\.\d+$/
+
+deploy-beta:
+  stage: deploy-beta
+  script:
+    - export DOCKER_IMAGE="pro/poker_cms_web"
+    - export FINAL_IMAGE="$REGISTRY_SERVER/$DOCKER_IMAGE:$CI_COMMIT_TAG"
+
+    # SSH setup
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" > /tmp/private_key
+    - chmod 600 /tmp/private_key
+    - ssh-add /tmp/private_key
+    - mkdir -p ~/.ssh
+    - ssh-keyscan 3.0.71.212 >> ~/.ssh/known_hosts
+
+    # Pull image
+    - echo "Pulling latest image on remote server..."
+    - ssh ubuntu@3.0.71.212 "docker pull $FINAL_IMAGE"
+
+    # # Stop & remove old container
+    # - echo "Stopping old container if exists..."
+    # - ssh ubuntu@3.0.71.212 '
+    #   CONTAINER_ID=$(docker ps -q --filter name=poker_cms_frontend);
+    #   if [ -n "$CONTAINER_ID" ]; then
+    #   docker rm -f $CONTAINER_ID;
+    #   else
+    #   echo "No running container named poker_cms_frontend found.";
+    #   fi
+    #   '
+
+    # # Update .env on remote
+    # - echo "Updating FRONTEND_VERSION in .env..."
+    # - ssh ubuntu@3.0.71.212 "
+    #   sed -i \"s/^FRONTEND_VERSION=.*/FRONTEND_VERSION=$CI_COMMIT_TAG/\" ~/web/dev/.env
+    #   "
+
+    # # Restart with docker compose
+    # - echo "Starting container with docker-compose..."
+    # - ssh ubuntu@3.0.71.212 "cd ~/web/dev && docker compose up -d poker_cms_frontend"
+
+    # # Cleanup old images
+    # - echo "Cleaning up old images..."
+    # - |
+    #   ssh ubuntu@3.0.71.212 '
+    #     TAG_TO_KEEP="'$CI_COMMIT_TAG'"
+    #     docker images --format "{{.Repository}} {{.Tag}} {{.ID}}" \
+    #     | grep "192.168.1.202:5001/poker_cms_web" \
+    #     | grep -v "$TAG_TO_KEEP" \
+    #     | grep -v "latest" \
+    #     | awk "{print \$3}" \
+    #     | xargs -r docker rmi || true
+    #   '
+  only:
+    - /^v\d+\.\d+\.\d+-pro$/

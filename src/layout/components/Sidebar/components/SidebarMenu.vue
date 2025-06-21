@@ -1,38 +1,51 @@
 <!-- 菜单组件 -->
 <template>
-  <el-menu
-    ref="menuRef"
-    :collapse="!appStore.sidebar.opened"
-    :background-color="
-      theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
-        ? variables['menu-background']
-        : undefined
-    "
-    :text-color="
-      theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
-        ? variables['menu-text']
-        : undefined
-    "
-    :active-text-color="
-      theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
-        ? variables['menu-active-text']
-        : undefined
-    "
-    :popper-effect="theme"
-    :unique-opened="true"
-    :collapse-transition="false"
-    :mode="menuMode"
-    @open="onMenuOpen"
-    @close="onMenuClose"
+  <div
+    ref="sidebarDiv"
+    class="sidebar-container"
+    :class="appStore.sidebar.opened ? 'min-w-[240px]!' : ''"
   >
-    <!-- 菜单项 -->
-    <SidebarMenuItem
-      v-for="route in data"
-      :key="route.path"
-      :item="route"
-      :base-path="resolveFullPath(route.path)"
-    />
-  </el-menu>
+    <el-scrollbar class="sidebar-scrollbar">
+      <el-menu
+        ref="menuRef"
+        :collapse="!appStore.sidebar.opened"
+        :background-color="
+          theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
+            ? variables['menu-background']
+            : undefined
+        "
+        :text-color="
+          theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
+            ? variables['menu-text']
+            : undefined
+        "
+        :active-text-color="
+          theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
+            ? variables['menu-active-text']
+            : undefined
+        "
+        :popper-effect="theme"
+        :unique-opened="true"
+        :collapse-transition="false"
+        :mode="menuMode"
+        class="sidebar-menu"
+        :class="appStore.sidebar.opened ? 'px-2' : ''"
+        @open="onMenuOpen"
+        @close="onMenuClose"
+      >
+        <SidebarMenuItem
+          v-for="route in data"
+          :key="route.path"
+          :item="route"
+          :base-path="resolveFullPath(route.path)"
+        />
+      </el-menu>
+    </el-scrollbar>
+    <div v-if="appStore.sidebar.opened" class="version-info">
+      <div>2025 © POKER MARS.</div>
+      <div>{{ appInfo.pkg.version }}:{{ formatTime(appInfo.buildTimestamp) }}</div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -42,10 +55,39 @@ import type { RouteRecordRaw } from "vue-router";
 
 import { LayoutMode } from "@/enums/settings/layout.enum";
 import { SidebarColor } from "@/enums/settings/theme.enum";
-import { useSettingsStore, useAppStore } from "@/store";
+import { useSettingsStore, useAppStore, useMenuStore } from "@/store";
 import { isExternal } from "@/utils/index";
 
 import variables from "@/styles/variables.module.scss";
+import dayjs from "dayjs";
+
+const sidebarDiv = ref(null);
+let resizeObserver: ResizeObserver | null = null;
+
+const menuStore = useMenuStore();
+
+onMounted(() => {
+  resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      menuStore?.setMenuWidth(entry.contentRect.width.toString());
+    }
+  });
+
+  if (sidebarDiv.value) {
+    resizeObserver.observe(sidebarDiv.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  if (resizeObserver && sidebarDiv.value) {
+    resizeObserver.unobserve(sidebarDiv.value);
+  }
+  resizeObserver = null;
+});
+
+const appInfo = __APP_INFO__;
+
+const formatTime = (timestamp: number) => dayjs(timestamp).format("YYYY-MM-DD HH:mm:ss");
 
 const props = defineProps({
   data: {
@@ -114,9 +156,30 @@ provide("openedState", openedState);
 }
 
 :deep(.el-icon) {
-  background-image: url("@/assets/menus/arrow.png");
+  background-image: url("@/assets/menu/arrow.png");
   width: 20px;
   height: 20px;
   background-repeat: no-repeat;
+}
+
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 74px);
+}
+
+.sidebar-scrollbar {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.version-info {
+  flex-shrink: 0;
+  padding: 12px;
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  user-select: none;
+  background-color: var(--menu-background, #fff);
 }
 </style>

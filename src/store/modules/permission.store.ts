@@ -3,7 +3,8 @@ import { constantRoutes } from "@/router";
 import { store } from "@/store";
 import router from "@/router";
 
-import MenuAPI, { SidebarMenuVO, type RouteVO } from "@/api/system/menu.api";
+import MenuAPI, { SidebarMenuVO, type RouteVO } from "@/api/menu.api";
+import UserPermissionAPI from "@/api/user_permission.api";
 const modules = import.meta.glob("../../views/**/**.vue");
 const Layout = () => import("@/layout/index.vue");
 
@@ -11,6 +12,7 @@ export const usePermissionStore = defineStore("permission", () => {
   const routes = ref<RouteRecordRaw[]>([]);
   const mixedLayoutLeftRoutes = ref<RouteRecordRaw[]>([]);
   const isRoutesLoaded = ref(false);
+  const userPermissions = ref<string[]>([] as string[]);
 
   function generateRoutes() {
     return new Promise<RouteRecordRaw[]>((resolve, reject) => {
@@ -49,6 +51,23 @@ export const usePermissionStore = defineStore("permission", () => {
     isRoutesLoaded.value = false;
   };
 
+  const getUserPermissions = () => {
+    return new Promise<string[]>((resolve, reject) => {
+      UserPermissionAPI.get()
+        .then(({ data, result, msg }) => {
+          if (result) {
+            userPermissions.value = data;
+            resolve(data);
+          } else {
+            reject(msg);
+          }
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  };
+
   return {
     routes,
     mixedLayoutLeftRoutes,
@@ -56,6 +75,8 @@ export const usePermissionStore = defineStore("permission", () => {
     generateRoutes,
     setMixedLayoutLeftRoutes,
     resetRouter,
+    getUserPermissions,
+    userPermissions,
   };
 });
 
@@ -64,14 +85,18 @@ function convertToRouteVO(menuData: SidebarMenuVO[]): RouteVO[] {
     const currentPath = item.url;
 
     const route: RouteVO = {
-      name: `${item.name}-${currentPath.replace(/\//g, "-")}`,
+      name: `${item.name}-${currentPath.replace(/\//g, "-")}`.split(" ").join("_"),
       path: currentPath ? `/${currentPath}` : ``,
-      component: item.url ? `${currentPath}` : undefined,
+      component: item.url ? `${currentPath}` : "",
       meta: {
+        id: item.id,
         title: item.name,
         icon: item.icon,
         alwaysShow: item.subitems && item.subitems.length === 1,
         hidden: false,
+        keepAlive: true,
+        sidebar_sort: item.sidebar_sort,
+        function_code: item.function_code,
       },
       children: item.subitems.length ? convertToRouteVO(item.subitems) : [],
     };

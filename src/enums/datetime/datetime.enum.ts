@@ -1,5 +1,5 @@
 export const enum DateTimeFilterEnum {
-  TODAY = "today",
-  WEEK = "week",
-  MONTH = "month",
+  TODAY = "D",
+  WEEK = "W",
+  MONTH = "M",
 }

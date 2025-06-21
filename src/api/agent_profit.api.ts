@@ -1,56 +1,35 @@
 import request from "@/utils/request";
+import { PageQuery, DateTimeModelQuery, PageResultVO } from "./types/pageQuery";
 
 const AgentProfitAPI = {
-  /** 获取角色分页数据 */
   getAgentProfitData(queryParams?: AgentProfitPageQuery) {
-    return request<any, AgentProfitPageVO>({
-      url: `/agent-profit/list`,
+    return request<any, PageResultVO<AgentProfitVO[], AgentProfitPageQuery, SummaryVO>>({
+      url: `/report/agent-profit/list`,
       method: "get",
       params: queryParams,
-    });
-  },
-
-  DownloadPDF(queryParams?: { id: string }) {
-    return request<any, any>({
-      url: `/agent-profit/pdf`,
-      method: "get",
-      params: queryParams,
-      responseType: "blob",
     });
   },
 };
 
 export default AgentProfitAPI;
 
-export interface AgentProfitPageQuery {
-  start_datetime: string;
-  end_datetime: string;
-  start: number;
-  length: number;
-  sort: string;
-  sort_dir: number;
-  date_mode?: string | null;
-  search?: string | null;
-  income_type?: string | null;
-}
-
-export interface AgentProfitPageVO {
-  data: AgentProfitVO[];
-  input: AgentProfitPageQuery;
-  recordsTotal: number;
-  result: boolean;
-  summary: SummaryVO;
+export interface AgentProfitPageQuery extends PageQuery, DateTimeModelQuery {
+  search?: string | null | undefined;
+  income_type?: string | null | undefined;
 }
 
 export interface SummaryVO {
+  // 分成後總收益
   agent_split_gold: string;
   agent_split_gold_increase: string;
   agent_split_gold_previous: string;
   agent_split_gold_trend: number;
+  // 分成前總收益
   income_gold: string;
   income_gold_increase: string;
   income_gold_previous: string;
   income_gold_trend: number;
+  // 代理商分成前總收益
   split_gold: string;
   split_gold_increase: string;
   split_gold_previous: string;
@@ -58,36 +37,54 @@ export interface SummaryVO {
 }
 
 export interface AgentProfitVO {
-  account: string;
-  agent_deposit: string;
-  agent_name: string;
-  agent_split_gold: string;
-  agent_split_gold_del: string;
-  company_name: string;
-  create_time: string;
-  ga_company_name: string;
-  ga_name: string;
-  game_name: string;
-  game_nickname: string;
-  gold_type: number;
   id: string;
-  income_gold: string;
-  income_split: string;
-  income_type: string;
+  // 總代理編號
+  ga_name: string;
+  // 總代理名稱
+  ga_company_name: string;
+  // 代理編號
+  agent_name: string;
+  // 代理名稱
+  company_name: string;
+  // 牌局編號
   round_id: string;
+  // 代理商玩家編號
+  account: string;
+  // 代理商分成前收益
+  split_gold: string;
+  // 分成比例
+  income_split: string;
+  // 收益/支出類別
+  income_type: number;
+
+  // 收益/支出類別名稱
+  income_type_name: string;
+
+  // 收益金額
+  agent_split_gold: string;
+  // 支出金額
+  agent_split_gold_del: string;
+  // 貨幣類別
+  gold_type: number;
+  gold_type_name: string;
+  // 收益/支出所屬
   sea_type: number;
   sea_type_name: string;
-  server_id: number;
+  // 結算狀態
   settlement_status: number;
-  split_gold: string;
+  settlement_status_name: string;
+  // 交易時間
+  create_time: string;
+  // 代理存款
+  agent_deposit: string;
+  // 收入金額
+  income_gold: string;
+  // 遊戲名稱
+  game_name: string;
+  game_nickname: string;
+  // 遊戲編號
+  server_id: number;
+  // 牌局所屬
   table_type: number;
-}
-
-export interface SummaryItemVO {
-  title: string;
-  value: string;
-  previous: string;
-  increase: string;
-  trend: number;
-  imageSrc: string;
+  round_belong: string;
 }

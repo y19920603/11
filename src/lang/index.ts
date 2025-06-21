@@ -5,24 +5,30 @@ import { useAppStoreHook } from "@/store/modules/app.store";
 import enLocale from "./package/en";
 import CnLocale from "./package/cn";
 import TwLocale from "./package/tw";
+import DeLocale from "./package/de";
+import EsLocale from "./package/es";
+import ItLocale from "./package/it";
+import JaLocale from "./package/ja";
+import RuLocale from "./package/ru";
+import { LanguageEnum } from "@/enums";
 
 const appStore = useAppStoreHook();
 
 const messages = {
-  tw: {
-    ...TwLocale,
-  },
-  cn: {
-    ...CnLocale,
-  },
-  en: {
-    ...enLocale,
-  },
+  [LanguageEnum.EN]: { ...enLocale },
+  [LanguageEnum.ZH_CN]: { ...CnLocale },
+  [LanguageEnum.ZH_TW]: { ...TwLocale },
+  [LanguageEnum.DE]: { ...DeLocale },
+  [LanguageEnum.ES]: { ...EsLocale },
+  [LanguageEnum.IT]: { ...ItLocale },
+  [LanguageEnum.JA]: { ...JaLocale },
+  [LanguageEnum.RU]: { ...RuLocale },
 };
 
 const i18n = createI18n({
   legacy: false,
-  locale: appStore.language,
+  locale: appStore.language.toString(),
+  fallbackLocale: LanguageEnum.EN.toString(),
   messages: messages,
   globalInjection: true,
 });

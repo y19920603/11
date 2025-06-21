@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!item.meta || !item.meta.hidden">
+  <div v-if="!item.meta || !item.meta.hidden" class="py-[3px]">
     <template
       v-if="
         (!item.meta?.alwaysShow &&
@@ -13,14 +13,27 @@
           :index="item.name?.toString() ?? ''"
           :class="{ 'submenu-title-noDropdown': !isNest }"
         >
-          <SidebarMenuItemTitle :icon="onlyOneChild.meta.icon" :title="onlyOneChild.meta.title" />
+          <SidebarMenuItemTitle
+            :icon="onlyOneChild.meta.icon"
+            :title="onlyOneChild.meta.title"
+            :subItem="false"
+            :sortable="onlyOneChild.meta.sidebar_sort"
+            :function_code="onlyOneChild.meta.function_code"
+          />
         </el-menu-item>
       </RouterLink>
     </template>
 
     <el-sub-menu v-else ref="submenuRef" :index="item.name?.toString() ?? ''" teleported>
       <template #title>
-        <SidebarMenuItemTitle v-if="item.meta" :icon="item.meta.icon" :title="item.meta.title" />
+        <SidebarMenuItemTitle
+          v-if="item.meta"
+          :icon="item.meta.icon"
+          :title="typeof item.meta.title === 'function' ? item.meta.title() : item.meta.title"
+          :subItem="true"
+          :function_code="item.meta.function_code"
+          :sortable="item.meta.sidebar_sort"
+        />
       </template>
 
       <SidebarMenuItem
@@ -98,21 +111,26 @@ const submenuRef = ref<InstanceType<typeof ElSubMenu> | null>(null);
 
 const triggerMenuOpen = async () => {
   await nextTick();
-
   if (submenuRef.value && !openedState.value) {
     const submenuTitle = submenuRef.value.$el.querySelector(".el-sub-menu__title");
-    if (submenuTitle) {
+    if (submenuTitle && !submenuRef.value.$el.classList.contains("is-opened")) {
       submenuTitle.click();
       openedState.value = true;
     }
   }
 };
 
-watch(matchedChild, (newVal) => {
-  if (newVal && !openedState.value) {
-    triggerMenuOpen();
+watch(
+  matchedChild,
+  (newVal) => {
+    if (newVal && !openedState.value) {
+      triggerMenuOpen();
+    }
+  },
+  {
+    immediate: true,
   }
-});
+);
 </script>
 
 <style lang="scss">
@@ -196,12 +214,48 @@ html.sidebar-color-blue {
 }
 
 .el-menu-item.is-active {
-  color: #fff !important;
+  color: var(--el-sub-menu-title-active) !important;
 }
 
 .router-link-active > .el-menu-item {
   background: linear-gradient(to right, rgba(99, 109, 235, 0.5), rgba(99, 109, 235, 0.08));
-  color: #fff;
+  color: var(--router-link-active);
   border-radius: 50px;
+  > span {
+    color: #fff;
+  }
+}
+
+.el-sub-menu__title:hover {
+  background-color: var(--el-sub-menu-title-hover) !important;
+  border-radius: 50px !important;
+}
+
+.hideSidebar .el-sub-menu__title:hover {
+  border-radius: 0px !important;
+}
+
+html.sidebar-color-blue .el-menu-item:hover,
+.el-menu-item:hover {
+  background-color: transparent !important;
+  background: linear-gradient(to right, rgba(99, 109, 235, 0.5), rgba(99, 109, 235, 0.08));
+  border-radius: 50px;
+}
+
+.el-sub-menu__title {
+  transition: none !important;
+}
+
+.el-sub-menu .el-sub-menu__icon-arrow {
+  margin-top: 0px;
+  top: initial;
+}
+
+.el-sub-menu.is-opened > div {
+  background: #1b1d29;
+  border-radius: 50px;
+  > span {
+    color: #fff;
+  }
 }
 </style>

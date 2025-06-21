@@ -9,31 +9,13 @@ declare global {
   }
 
   /**
-   * 分页查询参数
-   */
-  interface PageQuery {
-    pageNum: number;
-    pageSize: number;
-  }
-
-  /**
-   * 分页响应对象
-   */
-  interface PageResult<T> {
-    /** 数据列表 */
-    list: T;
-    /** 总数 */
-    total: number;
-  }
-
-  /**
    * 页签对象
    */
   interface TagView {
     /** 页签名称 */
     name: string;
     /** 页签标题 */
-    title: string;
+    title: string | Function;
     /** 页签路由路径 */
     path: string;
     /** 页签路由完整路径 */
@@ -71,39 +53,13 @@ declare global {
     /** 布局大小(default |large |small) */
     size: string;
     /** 语言( zh-cn| en) */
-    language: string;
+    language: number;
     /** 是否开启水印 */
     watermarkEnabled: boolean;
     /** 水印内容 */
     watermarkContent: string;
     /** 侧边栏配色方案 */
     sidebarColorScheme: "classic-blue" | "minimal-white";
-  }
-
-  /**
-   * 下拉选项数据类型
-   */
-  interface OptionType {
-    /** 值 */
-    value: string | number;
-    /** 文本 */
-    label: string;
-    /** 子列表  */
-    children?: OptionType[];
-  }
-
-  /**
-   * 导入结果
-   */
-  interface ExcelResult {
-    /** 状态码 */
-    code: string;
-    /** 无效数据条数 */
-    invalidCount: number;
-    /** 有效数据条数 */
-    validCount: number;
-    /** 错误信息 */
-    messageList: Array<string>;
   }
 }
 export {};

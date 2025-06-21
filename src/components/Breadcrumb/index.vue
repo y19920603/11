@@ -1,40 +1,46 @@
 <template>
-  <el-breadcrumb class="flex-y-center">
-    <el-breadcrumb-item v-for="(item, index) in breadcrumbs" :key="item.path">
+  <el-breadcrumb class="flex-y-center px-8 my-2">
+    <el-breadcrumb-item
+      v-for="(item, index) in breadcrumbs"
+      :key="item.path"
+      :to="index !== breadcrumbs.length - 1 ? item.path : undefined"
+    >
       <span
-        v-if="item.redirect === 'noredirect' || index === breadcrumbs.length - 1"
-        class="color-gray-400"
+        :class="index === breadcrumbs.length - 1 ? 'text-[--breadcrumb-text]' : 'text-gray-400'"
       >
-        {{ translateRouteTitle(item.meta.title) }}
+        {{ typeof item.meta.title === "function" ? item.meta.title() : item.meta.title }}
       </span>
-      <a v-else @click.prevent="handleLink(item)">
-        {{ translateRouteTitle(item.meta.title) }}
-      </a>
     </el-breadcrumb-item>
   </el-breadcrumb>
 </template>
 
 <script setup lang="ts">
 import { RouteLocationMatched } from "vue-router";
-import { compile } from "path-to-regexp";
-import router from "@/router";
-import { translateRouteTitle } from "@/utils/i18n";
 
 const currentRoute = useRoute();
-const pathCompile = (path: string) => {
-  const { params } = currentRoute;
-  const toPath = compile(path);
-  return toPath(params);
-};
+const { t } = useI18n();
 
 const breadcrumbs = ref<Array<RouteLocationMatched>>([]);
 
 function getBreadcrumb() {
+  // 如果當前是首頁，不顯示麵包屑
+  if (currentRoute.path === "/dashboard") {
+    breadcrumbs.value = [];
+    return;
+  }
+
   let matched = currentRoute.matched.filter((item) => item.meta && item.meta.title);
   const first = matched[0];
+
   if (!isDashboard(first)) {
-    matched = [{ path: "/dashboard", meta: { title: "dashboard" } } as any].concat(matched);
+    matched = [
+      {
+        path: "/dashboard",
+        meta: { title: t("PAGE_HOME") },
+      } as any,
+    ].concat(matched);
   }
+
   breadcrumbs.value = matched.filter((item) => {
     return item.meta && item.meta.title && item.meta.breadcrumb !== false;
   });
@@ -48,25 +54,9 @@ function isDashboard(route: RouteLocationMatched) {
   return name.toString().trim().toLocaleLowerCase() === "Dashboard".toLocaleLowerCase();
 }
 
-function handleLink(item: any) {
-  const { redirect, path } = item;
-  if (redirect) {
-    router.push(redirect).catch((err) => {
-      console.warn(err);
-    });
-    return;
-  }
-  router.push(pathCompile(path)).catch((err) => {
-    console.warn(err);
-  });
-}
-
 watch(
   () => currentRoute.path,
-  (path) => {
-    if (path.startsWith("/redirect/")) {
-      return;
-    }
+  () => {
     getBreadcrumb();
   }
 );

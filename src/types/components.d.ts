@@ -6,14 +6,6 @@ export {}
 
 declare module "vue" {
   export interface GlobalComponents {
-    AppLink: (typeof import("./../components/AppLink/index.vue"))["default"];
-    AppMain: (typeof import("./../layout/components/AppMain/index.vue"))["default"];
-    Breadcrumb: (typeof import("./../components/Breadcrumb/index.vue"))["default"];
-    CopyButton: (typeof import("./../components/CopyButton/index.vue"))["default"];
-    CURD: (typeof import("./../components/CURD/index.vue"))["default"];
-    Dict: (typeof import("./../components/Dict/index.vue"))["default"];
-    DictLabel: (typeof import("./../components/Dict/DictLabel.vue"))["default"];
-    ECharts: (typeof import("./../components/ECharts/index.vue"))["default"];
     ElBacktop: (typeof import("element-plus/es"))["ElBacktop"];
     ElBreadcrumb: (typeof import("element-plus/es"))["ElBreadcrumb"];
     ElBreadcrumbItem: (typeof import("element-plus/es"))["ElBreadcrumbItem"];
@@ -61,24 +53,15 @@ declare module "vue" {
     ElUpload: (typeof import("element-plus/es"))["ElUpload"];
     ElWatermark: (typeof import("element-plus/es"))["ElWatermark"];
     ElSkeleton: (typeof import("element-plus/es"))["ElSkeleton"];
-    FileUpload: (typeof import("./../components/Upload/FileUpload.vue"))["default"];
-    Form: (typeof import("./../components/CURD/Form.vue"))["default"];
+    Breadcrumb: (typeof import("./../components/Breadcrumb/index.vue"))["default"];
+    ECharts: (typeof import("./../components/ECharts/index.vue"))["default"];
     Fullscreen: (typeof import("./../components/Fullscreen/index.vue"))["default"];
-    GithubCorner: (typeof import("./../components/GithubCorner/index.vue"))["default"];
     Hamburger: (typeof import("./../components/Hamburger/index.vue"))["default"];
-    IconSelect: (typeof import("./../components/IconSelect/index.vue"))["default"];
     LangSelect: (typeof import("./../components/LangSelect/index.vue"))["default"];
-    MenuSearch: (typeof import("./../components/MenuSearch/index.vue"))["default"];
-    MultiImageUpload: (typeof import("./../components/Upload/MultiImageUpload.vue"))["default"];
-    NoticeDropdown: (typeof import("./../components/Notice/NoticeDropdown.vue"))["default"];
-    LayoutSelect: (typeof import("./../layout/components/Settings/components/LayoutSelect.vue"))["default"];
-    PageContent: (typeof import("./../components/CURD/PageContent.vue"))["default"];
-    PageForm: (typeof import("./../components/CURD/PageForm.vue"))["default"];
-    PageModal: (typeof import("./../components/CURD/PageModal.vue"))["default"];
-    PageSearch: (typeof import("./../components/CURD/PageSearch.vue"))["default"];
-    Pagination: (typeof import("./../components/Pagination/index.vue"))["default"];
     RouterLink: (typeof import("vue-router"))["RouterLink"];
     RouterView: (typeof import("vue-router"))["RouterView"];
+    LayoutSelect: (typeof import("./../layout/components/Settings/components/LayoutSelect.vue"))["default"];
+    AppMain: (typeof import("./../layout/components/AppMain/index.vue"))["default"];
     Settings: (typeof import("./../layout/components/Settings/index.vue"))["default"];
     Sidebar: (typeof import("./../layout/components/Sidebar/index.vue"))["default"];
     SidebarLogo: (typeof import("./../layout/components/Sidebar/components/SidebarLogo.vue"))["default"];
@@ -86,11 +69,7 @@ declare module "vue" {
     SidebarMenuItem: (typeof import("./../layout/components/Sidebar/components/SidebarMenuItem.vue"))["default"];
     SidebarMenuItemTitle: (typeof import("./../layout/components/Sidebar/components/SidebarMenuItemTitle.vue"))["default"];
     SidebarMixTopMenu: (typeof import("./../layout/components/Sidebar/components/SidebarMixTopMenu.vue"))["default"];
-    SingleImageUpload: (typeof import("./../components/Upload/SingleImageUpload.vue"))["default"];
-    SizeSelect: (typeof import("./../components/SizeSelect/index.vue"))["default"];
-    TableSelect: (typeof import("./../components/TableSelect/index.vue"))["default"];
     TagsView: (typeof import("./../layout/components/TagsView/index.vue"))["default"];
-    WangEditor: (typeof import("./../components/WangEditor/index.vue"))["default"];
   }
   export interface ComponentCustomProperties {
     vLoading: (typeof import("element-plus/es"))["ElLoadingDirective"];

@@ -1,6 +1,10 @@
 <template>
   <div
-    class="flex flex-col bg-[url('/src/assets/dashboard/bg.png')] p-8 rounded-xl m-4 items-start items-center md:items-start"
+    class="flex flex-col p-8 rounded-xl m-4 items-start items-center md:items-start"
+    :style="{ backgroundImage: settingsStore.theme === ThemeMode.DARK ? `url(${bgImage})` : `` }"
+    :class="{
+      'border-2 rounded-lg border-[#eee] shadow-md': settingsStore.theme === ThemeMode.LIGHT,
+    }"
   >
     <div class="flex justify-start items-center w-full flex-col-reverse md:flex-row">
       <div>
@@ -9,22 +13,19 @@
         </div>
         <div class="flex justify-center md:justify-start items-center text-sm mt-3 text-coolgray">
           {{ $t(item.title) }}
-          <!-- <i
-            class="ml-2 w-4 h-4 block bg-[url('/src/assets/dashboard/ArrowRight.png')] bg-no-repeat bg-center"
-          ></i> -->
         </div>
       </div>
       <div class="flex-1"></div>
       <div class="w-[100px] h-[80px]">
         <div
           class="w-[100px] h-[80px] bg-no-repeat bg-center bg-contain"
-          :style="{ backgroundImage: `url('/src/assets/dashboard/${item.image}.png')` }"
+          :style="{ backgroundImage: `url(${getImg(item.image)})` }"
         ></div>
       </div>
     </div>
 
     <div class="flex justify-start items-center flex-wrap space-x-2">
-      <i :class="iconClass"></i>
+      <i v-if="iconClass" :class="iconClass"></i>
       <div :class="trendClass" class="font-bold">
         {{ item.growth }}
       </div>
@@ -39,6 +40,17 @@
 </template>
 <script setup lang="ts">
 import { DashBoardCard } from "@/api/dashboard.api";
+import bgImage from "@/assets/dashboards/bg.png";
+import { useSettingsStore } from "@/store";
+import { ThemeMode } from "@/enums/settings/theme.enum";
+
+const images = import.meta.glob("@/assets/dashboards/*.png", { eager: true });
+const settingsStore = useSettingsStore();
+const getImg = (imageName: string) => {
+  const imgModule = images[`/src/assets/dashboards/${imageName}.png`];
+
+  return imgModule ? (imgModule as { default: string }).default : "";
+};
 
 const props = defineProps({
   item: {

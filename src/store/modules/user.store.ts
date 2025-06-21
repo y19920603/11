@@ -1,14 +1,26 @@
-import { store } from "@/store";
+import { store, useAppStore } from "@/store";
 import { usePermissionStoreHook } from "@/store/modules/permission.store";
-import { useDictStoreHook } from "@/store/modules/dict.store";
 
 import AuthAPI, { type LoginFormData } from "@/api/auth.api";
-import UserAPI, { type UserInfo } from "@/api/system/user.api";
 
 import { setAccessToken, clearToken } from "@/utils/auth";
+import AccountManagementAPI from "@/api/account_management.api";
+
+export interface UserInfo {
+  id: number;
+  user_name: string;
+  email: string;
+  role: string;
+  agent_id: number;
+  ga_id: number;
+  lang: number;
+  reset_password: boolean;
+}
 
 export const useUserStore = defineStore("user", () => {
   const userInfo = useStorage<UserInfo>("userInfo", {} as UserInfo);
+  const appStore = useAppStore();
+  const { locale } = useI18n();
 
   /**
    * 登入
@@ -39,15 +51,18 @@ export const useUserStore = defineStore("user", () => {
    *
    */
   function getUserInfo() {
-    return new Promise<UserInfo>((resolve, reject) => {
-      UserAPI.getInfo()
-        .then((data) => {
-          if (!data) {
-            reject("Verification failed, please Login again.");
+    return new Promise((resolve, reject) => {
+      AccountManagementAPI.info()
+        .then(({ result, msg, data }) => {
+          if (!result) {
+            reject(msg);
             return;
           }
-          Object.assign(userInfo.value, { ...data });
-          resolve(data);
+          Object.assign(userInfo.value, { ...data[0] });
+          localStorage.setItem("userInfo", JSON.stringify({ ...userInfo.value }));
+          appStore.changeLanguage(data[0].lang);
+          locale.value = data[0].lang.toString();
+          resolve(data[0]);
         })
         .catch((error) => {
           reject(error);
@@ -72,7 +87,7 @@ export const useUserStore = defineStore("user", () => {
     return new Promise<void>((resolve) => {
       clearToken();
       usePermissionStoreHook().resetRouter();
-      useDictStoreHook().clearDictCache();
+      localStorage.removeItem("userInfo");
       resolve();
     });
   }

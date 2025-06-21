@@ -1,22 +1,29 @@
 <template>
   <div class="layout" :class="layoutClass">
     <div v-if="isMobile && isSidebarOpen" class="layout__overlay" @click="handleCloseSidebar" />
-
     <NavBar />
-
-    <div :class="{ hasTagsView: isShowTagsView }" class="layout__main">
-      <Sidebar class="layout__sidebar" />
-      <div class="main-container">
-        <router-view></router-view>
+    <div
+      :class="{ hasTagsView: isShowTagsView }"
+      class="layout__main min-w-[240px]!"
+      :style="{
+        marginLeft: isSidebarOpen && appStore.sidebar.opened ? menuStore.menuWidth + 'px' : '54px',
+      }"
+    >
+      <Sidebar class="layout__sidebar pt-1" />
+      <div class="main-container shadow-[inset_2px_0_0_#ececec] dark:shadow-none">
+        <Loading />
+        <AppMain />
       </div>
     </div>
   </div>
+  <UpdatePasswordDialog :showModel="showUpdatePasswordDialog" />
 </template>
 
 <script setup lang="ts">
-import { useAppStore, useSettingsStore, usePermissionStore } from "@/store";
+import { useAppStore, useSettingsStore, usePermissionStore, useMenuStore } from "@/store";
 
 import { DeviceEnum } from "@/enums/settings/device.enum";
+import { useUserStoreHook } from "@/store";
 
 import NavBar from "./components/NavBar/index.vue";
 
@@ -24,6 +31,7 @@ const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 const permissionStore = usePermissionStore();
 const width = useWindowSize().width;
+const menuStore = useMenuStore();
 
 // 常量
 const WIDTH_DESKTOP = 992; // 响应式布局容器固定宽度（大屏 >=1200px，中屏 >=992px，小屏 >=768px）
@@ -76,12 +84,25 @@ const layoutClass = computed(() => ({
 function handleCloseSidebar() {
   appStore.closeSideBar();
 }
+
+/*
+ * 是否需要重設密碼
+ */
+const user = useUserStoreHook();
+const showUpdatePasswordDialog = ref(false);
+watch(
+  () => user.userInfo,
+  (newValue) => {
+    showUpdatePasswordDialog.value = newValue.reset_password;
+  },
+  { immediate: true, deep: true }
+);
 </script>
 <style lang="scss" scoped>
 .main-container {
   overflow-y: auto;
   height: calc(100vh - $navbar-height);
-  background: #1b1d29;
+  background: var(--bg-contain);
 }
 .layout {
   width: 100%;
@@ -103,7 +124,7 @@ function handleCloseSidebar() {
     bottom: 0;
     left: 0;
     z-index: 999;
-    width: $sidebar-width;
+    width: auto;
     background-color: $menu-background;
     transition: width 0.28s;
 
@@ -114,7 +135,7 @@ function handleCloseSidebar() {
 
   &__main {
     position: relative;
-    margin-left: $sidebar-width;
+    margin-left: 190px;
     overflow-y: auto;
     transition: margin-left 0.28s;
 
@@ -170,7 +191,7 @@ function handleCloseSidebar() {
 
     .layout__sidebar--left {
       position: relative;
-      width: $sidebar-width;
+      width: auto;
       height: 100%;
       background-color: var(--menu-background);
 
@@ -248,14 +269,14 @@ function handleCloseSidebar() {
       }
 
       .layout__main {
-        margin-left: 0;
+        margin-left: 0 !important;
       }
     }
   }
   &.openSidebar {
     &.mobile {
       .layout__main {
-        margin-left: 0;
+        margin-left: 0 !important;
       }
     }
   }

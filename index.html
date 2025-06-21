@@ -11,7 +11,26 @@
     <div id="app"></div>
   </body>
   <script type="module" src="/src/main.ts"></script>
+  <script>
+    let currentVersion = null;
 
+    async function checkVersion() {
+      try {
+        const res = await fetch("/version.json?_t=" + Date.now());
+        const data = await res.json();
+
+        if (!currentVersion) {
+          currentVersion = data.version;
+        } else if (currentVersion !== data.version) {
+          console.log("🆕 New version detected, reloading...");
+          location.reload();
+        }
+      } catch (e) {
+        console.warn("Failed to check version:", e);
+      }
+    }
+    setInterval(checkVersion, 10000);
+  </script>
   <style>
     html,
     body,

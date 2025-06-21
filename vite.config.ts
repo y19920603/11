@@ -5,14 +5,15 @@ import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 
-import mockDevServerPlugin from "vite-plugin-mock-dev-server";
-
 import UnoCSS from "unocss/vite";
 import { resolve } from "path";
-import { name, version, engines, dependencies, devDependencies } from "./package.json";
+import { writeFileSync } from "fs";
+
+import { name, version } from "./package.json";
+const envVersion = process.env.VITE_APP_VERSION || version;
 
 const __APP_INFO__ = {
-  pkg: { name, version, engines, dependencies, devDependencies },
+  pkg: { name, version: envVersion },
   buildTimestamp: Date.now(),
 };
 
@@ -41,16 +42,26 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       port: +env.VITE_APP_PORT,
       open: true,
       proxy: {
-        [env.VITE_APP_BASE_API]: {
+        "/main": {
+          target: env.VITE_APP_API_MAIN_URL,
           changeOrigin: true,
-          target: env.VITE_APP_API_URL,
-          rewrite: (path) => path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
+          rewrite: (path) => path.replace(/^\/main/, env.VITE_APP_API_MAIN_PREFIX), // 把 /api 去掉
+        },
+        "/report": {
+          target: env.VITE_APP_API_REPORT_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/report/, env.VITE_APP_API_REPORT_PREFIX), // 把 /api 去掉
+        },
+        "/image/view": {
+          target: env.VITE_APP_API_REPORT_URL,
+          changeOrigin: true,
+          rewrite: (path) =>
+            path.replace(/^\/image\/view/, `${env.VITE_APP_API_MAIN_PREFIX}/image/view`), // 把 /api 去掉
         },
       },
     },
     plugins: [
       vue(),
-      env.VITE_MOCK_DEV_SERVER === "true" ? mockDevServerPlugin() : null,
       UnoCSS(),
       AutoImport({
         imports: ["vue", "@vueuse/core", "pinia", "vue-router", "vue-i18n"],
@@ -68,6 +79,13 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         dirs: ["src/components", "src/**/components"],
         dts: false,
       }),
+      {
+        name: "generate-version-json",
+        closeBundle() {
+          const version = envVersion;
+          writeFileSync("dist/version.json", JSON.stringify({ version }));
+        },
+      },
     ],
     optimizeDeps: {
       include: [
@@ -78,14 +96,12 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         "axios",
         "@vueuse/core",
         "sortablejs",
-        "exceljs",
         "path-to-regexp",
         "echarts/core",
         "echarts/renderers",
         "echarts/charts",
         "echarts/components",
         "vue-i18n",
-        "nprogress",
         "qs",
         "path-browserify",
         "@element-plus/icons-vue",

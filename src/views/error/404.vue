@@ -7,9 +7,8 @@
         </div>
       </div>
       <h4 class="text-uppercase mt-4">Sorry, page not found</h4>
-      <p class="text-muted">It will be as simple as Occidental in fact, it will be Occidental</p>
       <div class="mt-5">
-        <router-link to="/" class="btn btn-primary">Back to Dashboard</router-link>
+        <router-link to="/dashboard" class="btn btn-primary">Back to Dashboard</router-link>
       </div>
     </div>
   </div>

@@ -41,6 +41,17 @@ export default defineConfig({
     "flex-x-end": "flex items-center justify-end",
   },
   theme: {
+    breakpoints: {
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xlg: "1180px",
+      lgg: "1220px",
+      xl: "1280px",
+      "2xl": "1536px",
+      "2xll": "1840px",
+      "3xl": "2200px", // 👈 你自訂的斷點
+    },
     colors: {
       primary: "var(--el-color-primary)",
       primary_dark: "var(--el-color-primary-light-5)",

@@ -1,12 +1,12 @@
 <template>
   <div
-    class="flex justify-center items-center w-full h-full p-5 overflow-y-auto bg-[url('@/assets/images/cms_login_bg.png')] bg-no-repeat bg-center bg-right"
+    class="flex justify-center items-center w-full h-full p-5 overflow-y-auto bg-[url('@/assets/images/cms_login_bg.png')] bg-no-repeat bg-center bg-cover"
   >
     <!-- 登录页内容 -->
     <div
       class="flex flex-col justify-center items-center space-y-2xl md:w-8/12 lg:w-5/12 xl:w-3/12 w-11/12"
     >
-      <img :src="`src/assets/images/cms-logo.png`" class="h-[42px] w-[168px]" />
+      <img :src="cmsLogo" class="h-[42px] w-[168px]" />
       <div class="p-10 bg-[#242735] rounded-xl w-full flex justify-center items-center">
         <el-form ref="loginFormRef" :model="loginFormData" :rules="loginRules" class="w-full">
           <div class="flex justify-center flex-col items-center space-y-[8px]">
@@ -24,6 +24,7 @@
                   name="username"
                   size="large"
                   class="h-[40px] text-amber!"
+                  @blur="clearError('email')"
                 />
               </div>
             </el-form-item>
@@ -40,11 +41,10 @@
                   class="h-[40px]"
                   show-password
                   @keyup.enter="handleLoginSubmit"
+                  @blur="clearError('password')"
                 />
               </div>
             </el-form-item>
-
-            <div class="text-[#f56c6c] text-sm my-2">{{ errorMsg }}</div>
 
             <div class="w-full py-1 flex-x-between">
               <el-checkbox v-model="remember">
@@ -54,8 +54,7 @@
 
             <!-- 登录按钮 -->
             <el-button
-              class="w-[100px]! mt-4 self-center bg-gradient-to-b from-[#7E90FF] to-[#604CD6] color-white! gap-2! border-none!"
-              :loading="loading"
+              class="mt-4 self-center bg-gradient-to-b from-[#7E90FF] to-[#604CD6] color-white! gap-2! border-none!"
               size="large"
               round
               @click.prevent="handleLoginSubmit"
@@ -70,54 +69,54 @@
 </template>
 
 <script setup lang="ts">
+import cmsLogo from "@/assets/images/cms-logo.png";
 import { LocationQuery, RouteLocationRaw, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 
-import { errorObj, type LoginFormData } from "@/api/auth.api";
+import AuthAPI, { type LoginFormData } from "@/api/auth.api";
 import router from "@/router";
 
 import type { FormInstance } from "element-plus";
 import { Base64 } from "js-base64";
 
-import { useUserStore } from "@/store";
+import { useUserStore, useLoadingStore } from "@/store";
 import { Loca, LOCA_EMAIL, LOCA_PASSWORD } from "@/utils/loca";
+import { clearFieldError, updateValidationRules } from "@/utils/field";
 
 const userStore = useUserStore();
 
 const route = useRoute();
 const { t } = useI18n();
 const loginFormRef = ref<FormInstance>();
-const errorMsg = ref("");
 const remember = ref(false);
-const loading = ref(false);
+const { setLoading } = useLoadingStore();
+const isSubmit = ref(false);
 
 const loginFormData = ref<LoginFormData>({
   email: "",
   password: "",
 });
 
-const loginRules = computed(() => {
-  return {
-    email: [
-      {
-        required: true,
-        trigger: "blur",
-        message: t("MSG_REQUIRED", { field: t("LOGIN_EMAIL") }),
-      },
-      {
-        pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-        trigger: "blur",
-        message: t("MSG_FORMAT_ERROR", { field: t("LOGIN_EMAIL") }),
-      },
-    ],
-    password: [
-      {
-        required: true,
-        trigger: "blur",
-        message: t("MSG_REQUIRED", { field: t("LOGIN_PASSWORD") }),
-      },
-    ],
-  };
+const loginRules = reactive({
+  email: [
+    {
+      required: true,
+      trigger: "blur",
+      message: t("MSG_REQUIRED", { field: t("LOGIN_EMAIL") }),
+    },
+    {
+      pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+      trigger: "blur",
+      message: t("MSG_FORMAT_ERROR", { field: t("LOGIN_EMAIL") }),
+    },
+  ],
+  password: [
+    {
+      required: true,
+      trigger: "blur",
+      message: t("MSG_REQUIRED", { field: t("LOGIN_PASSWORD") }),
+    },
+  ],
 });
 
 async function handleLoginSubmit() {
@@ -127,9 +126,14 @@ async function handleLoginSubmit() {
     return;
   }
 
-  loading.value = true;
+  setLoading(true);
   try {
-    await userStore.login(loginFormData.value);
+    const encrypt = await AuthAPI.getKey();
+
+    await userStore.login({
+      ...loginFormData.value,
+      password: encrypt.encrypt(loginFormData.value.password) as string,
+    });
     if (remember.value) {
       Loca.set(LOCA_EMAIL, loginFormData.value.email);
       Loca.set(LOCA_PASSWORD, Base64.encode(loginFormData.value.password));
@@ -137,16 +141,23 @@ async function handleLoginSubmit() {
       Loca.remove([LOCA_EMAIL, LOCA_PASSWORD]);
     }
 
-    // await userStore.getUserInfo();
+    await userStore.getUserInfo();
 
     const redirect = resolveRedirectTarget(route.query);
     await router.push(redirect);
-  } catch (error) {
-    errorMsg.value = (error as errorObj[])[0].message;
+  } catch (errors) {
+    isSubmit.value = true;
+    updateValidationRules(loginFormRef.value, loginRules, errors as Record<string, string>);
   } finally {
-    loading.value = false;
+    setLoading(false);
   }
 }
+
+const clearError = (field: string) => {
+  if (isSubmit.value) {
+    clearFieldError(loginFormRef.value, loginRules, field);
+  }
+};
 
 function resolveRedirectTarget(query: LocationQuery): RouteLocationRaw {
   const defaultPath = "/";
